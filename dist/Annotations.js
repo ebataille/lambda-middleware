@@ -119,24 +119,24 @@ function initClassTarget(target) {
         target[METADATA_CLASS_KEY] = { methods: [], defaultJson: false, isServerClass: false };
     }
 }
-function ERequest() {
+function request() {
     return (target, key, index) => {
         addProperty(target, key, index, "request");
     };
 }
-exports.ERequest = ERequest;
-function EResponse() {
+exports.request = request;
+function response() {
     return (target, key, index) => {
         addProperty(target, key, index, "response");
     };
 }
-exports.EResponse = EResponse;
-function EHeader(paramName) {
+exports.response = response;
+function header(paramName) {
     return (target, key, index) => {
         addProperty(target, key, index, "header", paramName);
     };
 }
-exports.EHeader = EHeader;
+exports.header = header;
 function param(paramName) {
     return (target, key, index) => {
         let _paramName = paramName;

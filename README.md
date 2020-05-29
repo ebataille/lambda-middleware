@@ -1,5 +1,5 @@
 # @igloobuster/aws_lambda_middleware
-Annotation for express with typescript
+Middleware and annotations in typescript for AWS lambda
 
 [![NPM](https://nodei.co/npm/@igloobuster%2faws_lambda_middleware.png)](https://www.npmjs.com/package/@igloobuster%2faws_lambda_middleware)
 

@@ -1,7 +1,7 @@
 # @igloobuster/aws_lambda_middleware
 Annotation for express with typescript
 
-[![NPM](https://nodei.co/npm/@igloobuster/aws_lambda_middleware.png)](https://www.npmjs.com/package/@igloobuster/aws_lambda_middleware)
+[![NPM](https://nodei.co/npm/@igloobuster%2faws_lambda_middleware.png)](https://www.npmjs.com/package/@igloobuster%2faws_lambda_middleware)
 
 ## installations
 

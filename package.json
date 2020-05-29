@@ -1,0 +1,26 @@
+{
+	"name": "lambda_middleware",
+	"version": "0.1.1",
+	"description": "Middleware and annotation for AWS Lambda",
+	"keywords": [
+		"AWS",
+		"Lamda",
+		"Middleware",
+		"Annotations"
+	],
+	"repository": "git@github.com:ebataille/lambda-middleware.git",
+	"author": "edouard bataille",
+	"license": "Apache",
+	"types": "./dist/LambdaMiddleware.d.ts",
+	"dependencies": {
+		"cookie": "^0.4.1",
+		"cookie-parser": "^1.4.5",
+		"cookie-signature": "^1.1.0"
+	},
+	"devDependencies": {
+		"@types/aws-lambda": "^8.10.51",
+		"@types/cookie": "^0.4.0",
+		"@types/cookie-parser": "^1.4.2",
+		"@types/cookie-signature": "^1.0.3"
+	}
+}

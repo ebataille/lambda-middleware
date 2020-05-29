@@ -1,12 +1,12 @@
-# lambda_middleware
+# @igloobuster/aws_lambda_middleware
 Annotation for express with typescript
 
-[![NPM](https://nodei.co/npm/lambda_middleware.png)](https://www.npmjs.com/package/lambda_middleware)
+[![NPM](https://nodei.co/npm/@igloobuster/aws_lambda_middleware.png)](https://www.npmjs.com/package/@igloobuster/aws_lambda_middleware)
 
 ## installations
 
 ```
-npm install --save lambda_middleware
+npm install --save @igloobuster/aws_lambda_middleware
 ```
 
 ## how It works
@@ -23,8 +23,8 @@ You need to declare function to handle the lambda call.
 I prefer using class but it's not mandatory
 
 ```typescript
-import {LambdaRequest, Router, Response} from "lambda_middleware/dist/middleware/Router";
-import {BodyParserMiddleware} from "lambda_middleware/dist/middleware/BodyParserMiddleware";
+import {LambdaRequest, Router, Response} from "@igloobuster/aws_lambda_middleware/dist/middleware/Router";
+import {BodyParserMiddleware} from "@igloobuster/aws_lambda_middleware/dist/middleware/BodyParserMiddleware";
 
 
 class HelloWorld {
@@ -60,7 +60,7 @@ Let's say for example that you need to response with cors headers.
 
 ```typescript
 import {Config} from "../helper/Config";
-import {AbstractMiddleware, LambdaRequest, Response} from "lambda_middleware/dist/middleware/Router";
+import {AbstractMiddleware, LambdaRequest, Response} from "@igloobuster/aws_lambda_middleware/dist/middleware/Router";
 import {APIGatewayEventRequestContext, APIGatewayProxyEvent} from "aws-lambda";
 
 
@@ -100,9 +100,9 @@ new HelloWorld(router);
 The library also provides annotation to make it more easy to use
 
 ```typescript
-import {BodyParserMiddleware} from "lambda_middleware/dist/middleware/BodyParserMiddleware";
-import {Controller, custom, Method, param, query} from "lambda_middleware/dist/Annotations";
-import {Router} from "lambda_middleware/dist/middleware/Router";
+import {BodyParserMiddleware} from "@igloobuster/aws_lambda_middleware/dist/middleware/BodyParserMiddleware";
+import {Controller, custom, Method, param, query} from "@igloobuster/aws_lambda_middleware/dist/Annotations";
+import {Router} from "@igloobuster/aws_lambda_middleware/dist/middleware/Router";
 
 @Controller({exports, json: true, router: new Router([new BodyParserMiddleware()])})
 export class HelloController {

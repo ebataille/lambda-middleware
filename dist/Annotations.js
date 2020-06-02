@@ -26,8 +26,7 @@ function Controller(controllerParams) {
             original.prototype[METADATA_CLASS_KEY].defaultJson = controllerParams.json;
             let res = construct(original, args);
             for (let subRoute of original.prototype[METADATA_CLASS_KEY].methods) {
-                console.log(controllerParams, subRoute);
-                controllerParams.router.add(controllerParams.exports, subRoute.name, (req, response, context) => __awaiter(this, void 0, void 0, function* () { return subRoute.value(req, response); }));
+                controllerParams.router.add(controllerParams.exports, subRoute.name, (req, response, context) => __awaiter(this, void 0, void 0, function* () { return subRoute.value(req, response, res); }));
             }
             return res;
         };

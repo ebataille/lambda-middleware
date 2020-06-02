@@ -54,8 +54,7 @@ export function Controller<T extends any>(controllerParams: ControllerParams) {
 
 			let res = construct(original, args);
 			for (let subRoute of original.prototype[METADATA_CLASS_KEY].methods) {
-				console.log(controllerParams, subRoute)
-				controllerParams.router.add(controllerParams.exports, subRoute.name, async (req: LambdaRequest<any>, response: Response, context: APIGatewayEventRequestContext) => subRoute.value(req, response));
+				controllerParams.router.add(controllerParams.exports, subRoute.name, async (req: LambdaRequest<any>, response: Response, context: APIGatewayEventRequestContext) => subRoute.value(req, response, res));
 			}
 			return res;
 		};

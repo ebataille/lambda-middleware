@@ -16,6 +16,7 @@ function Controller(controllerParams) {
     return (target) => {
         const res = new target();
         initClassTarget(res);
+        res.__proto__[METADATA_CLASS_KEY].defaultJson = controllerParams.json;
         for (let subRoute of res.__proto__[METADATA_CLASS_KEY].methods) {
             controllerParams.router.add(controllerParams.exports, subRoute.name, (req, response, context) => __awaiter(this, void 0, void 0, function* () { return subRoute.value(req, response, res); }));
         }
@@ -96,7 +97,7 @@ function handleMethod(routeValues, target, key, descriptor) {
             if (routeValues.status) {
                 response.setStatusCode(result && (result.hasOwnProperty("status") ? result.status : result));
             }
-            else if (routeValues.json || (target[METADATA_CLASS_KEY].defaultJson && !routeValues.noResponse)) {
+            else if (routeValues.json || (target.__proto__[METADATA_CLASS_KEY].defaultJson && !routeValues.noResponse)) {
                 response.json(result && (result.hasOwnProperty("body") ? result.body : result));
             }
             else if (!routeValues.noResponse) {

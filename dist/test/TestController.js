@@ -58,7 +58,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], TestController.prototype, "testQuery", null);
 TestController = TestController_1 = __decorate([
-    Annotations_1.Controller({ router: new Router_1.Router([]), exports })
+    Annotations_1.Controller({ router: new Router_1.Router([]), exports, json: true })
 ], TestController);
 exports.TestController = TestController;
 //# sourceMappingURL=TestController.js.map

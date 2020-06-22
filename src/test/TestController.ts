@@ -1,8 +1,8 @@
-import {Controller, Method, ParamTypes, query} from "../Annotations";
+import {Controller, Method, query} from "../Annotations";
 import {Router} from "../middleware/Router";
 
 
-@Controller({router: new Router([]), exports})
+@Controller({router: new Router([]), exports, json:true})
 export class TestController {
 
 	foo: string = "bar";

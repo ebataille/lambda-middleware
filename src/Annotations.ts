@@ -41,6 +41,7 @@ export function Controller<T extends any>(controllerParams: ControllerParams) {
 	return (target: any) => {
 		const res = new target();
 		initClassTarget(res);
+		res.__proto__[METADATA_CLASS_KEY].defaultJson = controllerParams.json
 		for (let subRoute of res.__proto__[METADATA_CLASS_KEY].methods) {
 			controllerParams.router.add(controllerParams.exports, subRoute.name, async (req: LambdaRequest<any>, response: Response, context: APIGatewayEventRequestContext) => subRoute.value(req, response, res));
 		}
@@ -121,7 +122,7 @@ function handleMethod<T extends any>(routeValues: ControllerValues, target: T, k
 			}
 			if (routeValues.status) {
 				response.setStatusCode(result && (result.hasOwnProperty("status") ? result.status : result));
-			} else if (routeValues.json || (target[METADATA_CLASS_KEY].defaultJson && !routeValues.noResponse)) {
+			} else if (routeValues.json || (target.__proto__[METADATA_CLASS_KEY].defaultJson && !routeValues.noResponse)) {
 				response.json(result && (result.hasOwnProperty("body") ? result.body : result));
 			} else if (!routeValues.noResponse) {
 				response.send(result && (result.body ? result.body : result));

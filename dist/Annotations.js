@@ -36,6 +36,21 @@ function Controller(controllerParams) {
     };
 }
 exports.Controller = Controller;
+function getProperValue(value, targetType) {
+    if (!value) {
+        return value;
+    }
+    switch (targetType) {
+        case "boolean":
+            return value === "true";
+        case "integer":
+            return parseInt(value);
+        case "float":
+            return parseFloat(value);
+        default:
+            return value;
+    }
+}
 function handleMethod(routeValues, target, key, descriptor) {
     if (descriptor === undefined) {
         descriptor = Object.getOwnPropertyDescriptor(target, key);
@@ -53,10 +68,10 @@ function handleMethod(routeValues, target, key, descriptor) {
         for (let p of target[metadataKey]) {
             switch (p.type) {
                 case "params":
-                    params[p.index] = request.pathParameters && request.pathParameters[p.reqName];
+                    params[p.index] = getProperValue(request.pathParameters && request.pathParameters[p.reqName], p.targetType);
                     break;
                 case "query":
-                    params[p.index] = request.queryStringParameters && request.queryStringParameters[p.reqName];
+                    params[p.index] = getProperValue(request.queryStringParameters && request.queryStringParameters[p.reqName], p.targetType);
                     break;
                 case "request":
                     params[p.index] = request;
@@ -65,7 +80,7 @@ function handleMethod(routeValues, target, key, descriptor) {
                     params[p.index] = response;
                     break;
                 case "body":
-                    params[p.index] = request.json;
+                    params[p.index] = !!request.json ? request.json : request.body;
                     break;
                 case "header":
                     if (p.reqName) {
@@ -118,62 +133,89 @@ function initClassTarget(target) {
         target[METADATA_CLASS_KEY] = { methods: [], defaultJson: false, isServerClass: false };
     }
 }
+/**
+ * get the @type LambdaRequest object
+ */
 function request() {
     return (target, key, index) => {
         addProperty(target, key, index, "request");
     };
 }
 exports.request = request;
+/**
+ * Get the @type Response object
+ */
 function response() {
     return (target, key, index) => {
         addProperty(target, key, index, "response");
     };
 }
 exports.response = response;
+/**
+ * Get an header property or if no paramName provided the full header object
+ * @param paramName the name of the property to get (optional)
+ */
 function header(paramName) {
     return (target, key, index) => {
         addProperty(target, key, index, "header", paramName);
     };
 }
 exports.header = header;
-function param(paramName) {
+/**
+ * Get a path parameter property
+ * @param paramName the name of the property to get (optional)
+ * @param type can be boolean, integer or float, in case of boolean, it checks that the value equals "true", for integer it apply a parseInt, for float a parseFloat (optional)
+ */
+function param(paramName, type = "string") {
     return (target, key, index) => {
         let _paramName = paramName;
         if (!_paramName) {
             _paramName = getParamNames(target[key])[index];
         }
-        addProperty(target, key, index, "params", _paramName);
+        addProperty(target, key, index, "params", _paramName, type);
     };
 }
 exports.param = param;
+/**
+ * get the body of the request, if the body is a json, return the json, the plain text else
+ */
 function body() {
     return (target, key, index) => {
         addProperty(target, key, index, "body");
     };
 }
 exports.body = body;
-function query(paramName) {
+/**
+ * Get a query property
+ * @param paramName the name of the property to get (optional)
+ * @param type can be boolean, integer or float, in case of boolean, it checks that the value equals "true", for integer it apply a parseInt, for float a parseFloat (optional)
+ */
+function query(paramName, type = "string") {
     return (target, key, index) => {
         let _paramName = paramName;
         if (!_paramName) {
             _paramName = getParamNames(target[key])[index];
         }
-        addProperty(target, key, index, "query", _paramName);
+        addProperty(target, key, index, "query", _paramName, type);
     };
 }
 exports.query = query;
+/**
+ * Get a property inside the request handled by the middleware
+ * @param paramName The name of the property to get
+ */
 function custom(paramName) {
     return (target, key, index) => {
         addProperty(target, key, index, "custom", paramName);
     };
 }
 exports.custom = custom;
-function addProperty(target, key, index, type, reqName) {
+function addProperty(target, key, index, type, reqName, targetType = "string") {
     let metadataKey = `${METADATA_METHOD_KEY}${key}`;
     if (!target[metadataKey]) {
         target[metadataKey] = [];
     }
-    target[metadataKey].push({ index: index, reqName: reqName, type: type });
+    target[metadataKey].push({ index: index, reqName: reqName, type: type, targetType });
 }
 // https://stackoverflow.com/questions/1007981/how-to-get-function-parameter-names-values-dynamically/9924463#9924463
 function getParamNames(func) {
@@ -185,3 +227,4 @@ function getParamNames(func) {
         result = [];
     return result;
 }
+//# sourceMappingURL=Annotations.js.map

@@ -45,3 +45,4 @@ class CookieParser extends Router_1.AbstractMiddleware {
     }
 }
 exports.CookieParser = CookieParser;
+//# sourceMappingURL=CookieParser.js.map

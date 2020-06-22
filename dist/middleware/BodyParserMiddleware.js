@@ -40,3 +40,4 @@ class BodyParserMiddleware extends Router_1.AbstractMiddleware {
     }
 }
 exports.BodyParserMiddleware = BodyParserMiddleware;
+//# sourceMappingURL=BodyParserMiddleware.js.map

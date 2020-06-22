@@ -76,3 +76,4 @@ class GzipMiddleware extends Router_1.AbstractMiddleware {
     }
 }
 exports.GzipMiddleware = GzipMiddleware;
+//# sourceMappingURL=GzipMiddleware.js.map

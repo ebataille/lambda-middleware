@@ -1,4 +1,5 @@
 import { Router } from "./middleware/Router";
+import "reflect-metadata";
 export interface ControllerParams {
     exports: any;
     router: Router;
@@ -13,7 +14,7 @@ export interface Result {
     body: any;
     headers?: any[];
 }
-export declare function Controller<T extends any>(controllerParams: ControllerParams): (target: any) => any;
+export declare function Controller<T extends any>(controllerParams: ControllerParams): (target: any) => void;
 export declare function Method<T extends any>(routeValues?: ControllerValues): (target: T, key: string, descriptor: TypedPropertyDescriptor<(...args: any[]) => Promise<any>>) => TypedPropertyDescriptor<(...args: any[]) => Promise<any>> | undefined;
 /**
  * get the @type LambdaRequest object
@@ -29,21 +30,19 @@ export declare function response(): (target: any, key: string, index: number) =>
  */
 export declare function header(paramName?: string): (target: any, key: string, index: number) => void;
 /**
- * Get a path parameter property
+ * Get a path parameter property, the parameter will be cast using the Reflect typescript library
  * @param paramName the name of the property to get (optional)
- * @param type can be boolean, integer or float, in case of boolean, it checks that the value equals "true", for integer it apply a parseInt, for float a parseFloat (optional)
  */
-export declare function param(paramName?: string, type?: string): (target: any, key: string, index: number) => void;
+export declare function param(paramName?: string): (target: any, key: string, index: number) => void;
 /**
  * get the body of the request, if the body is a json, return the json, the plain text else
  */
 export declare function body(): (target: any, key: string, index: number) => void;
 /**
- * Get a query property
+ * Get a query property, the property will be cast using the Reflect typescript library
  * @param paramName the name of the property to get (optional)
- * @param type can be boolean, integer or float, in case of boolean, it checks that the value equals "true", for integer it apply a parseInt, for float a parseFloat (optional)
  */
-export declare function query(paramName?: string, type?: string): (target: any, key: string, index: number) => void;
+export declare function query(paramName?: string): (target: any, key: string, index: number) => void;
 /**
  * Get a property inside the request handled by the middleware
  * @param paramName The name of the property to get

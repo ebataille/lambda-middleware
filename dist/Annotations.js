@@ -9,36 +9,25 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+require("reflect-metadata");
 const METADATA_CLASS_KEY = "ea_metadata_class";
 const METADATA_METHOD_KEY = "ea_metadata_";
 function Controller(controllerParams) {
     return (target) => {
-        let original = target;
-        function construct(constructor, args) {
-            let c = function () {
-                return new constructor(args);
-            };
-            c.prototype = constructor.prototype;
-            return new c();
+        const res = new target();
+        initClassTarget(res);
+        for (let subRoute of res.__proto__[METADATA_CLASS_KEY].methods) {
+            controllerParams.router.add(controllerParams.exports, subRoute.name, (req, response, context) => __awaiter(this, void 0, void 0, function* () { return subRoute.value(req, response, res); }));
         }
-        let f = function (...args) {
-            initClassTarget(original.prototype);
-            original.prototype[METADATA_CLASS_KEY].defaultJson = controllerParams.json;
-            let res = construct(original, args);
-            for (let subRoute of original.prototype[METADATA_CLASS_KEY].methods) {
-                controllerParams.router.add(controllerParams.exports, subRoute.name, (req, response, context) => __awaiter(this, void 0, void 0, function* () { return subRoute.value(req, response, res); }));
-            }
-            return res;
-        };
-        f.prototype = original.prototype;
-        f();
-        return f;
     };
 }
 exports.Controller = Controller;
 function getProperValue(value, targetType) {
     if (!value) {
         return value;
+    }
+    if (typeof targetType === "function") {
+        return targetType(value);
     }
     switch (targetType) {
         case "boolean":
@@ -116,7 +105,7 @@ function handleMethod(routeValues, target, key, descriptor) {
         });
     };
     initClassTarget(target);
-    target[METADATA_CLASS_KEY].methods.push({
+    target.__proto__[METADATA_CLASS_KEY].methods.push({
         name: key,
         value: descriptor.value
     });
@@ -129,8 +118,8 @@ function Method(routeValues = {}) {
 }
 exports.Method = Method;
 function initClassTarget(target) {
-    if (!target[METADATA_CLASS_KEY]) {
-        target[METADATA_CLASS_KEY] = { methods: [], defaultJson: false, isServerClass: false };
+    if (!target.__proto__[METADATA_CLASS_KEY]) {
+        target.__proto__[METADATA_CLASS_KEY] = { methods: [], defaultJson: false, isServerClass: false };
     }
 }
 /**
@@ -162,12 +151,12 @@ function header(paramName) {
 }
 exports.header = header;
 /**
- * Get a path parameter property
+ * Get a path parameter property, the parameter will be cast using the Reflect typescript library
  * @param paramName the name of the property to get (optional)
- * @param type can be boolean, integer or float, in case of boolean, it checks that the value equals "true", for integer it apply a parseInt, for float a parseFloat (optional)
  */
-function param(paramName, type = "string") {
+function param(paramName) {
     return (target, key, index) => {
+        const type = getType(target, key, index);
         let _paramName = paramName;
         if (!_paramName) {
             _paramName = getParamNames(target[key])[index];
@@ -186,12 +175,12 @@ function body() {
 }
 exports.body = body;
 /**
- * Get a query property
+ * Get a query property, the property will be cast using the Reflect typescript library
  * @param paramName the name of the property to get (optional)
- * @param type can be boolean, integer or float, in case of boolean, it checks that the value equals "true", for integer it apply a parseInt, for float a parseFloat (optional)
  */
-function query(paramName, type = "string") {
+function query(paramName) {
     return (target, key, index) => {
+        let type = getType(target, key, index);
         let _paramName = paramName;
         if (!_paramName) {
             _paramName = getParamNames(target[key])[index];
@@ -210,6 +199,16 @@ function custom(paramName) {
     };
 }
 exports.custom = custom;
+function getType(target, key, index) {
+    let type = null;
+    if (Reflect.hasMetadata("design:paramtypes", target, key)) {
+        const types = Reflect.getMetadata("design:paramtypes", target, key);
+        if (types.length > index) {
+            type = types[index];
+        }
+    }
+    return type;
+}
 function addProperty(target, key, index, type, reqName, targetType = "string") {
     let metadataKey = `${METADATA_METHOD_KEY}${key}`;
     if (!target[metadataKey]) {

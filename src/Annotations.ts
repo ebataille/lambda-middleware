@@ -15,6 +15,7 @@ limitations under the License.
  */
 import {LambdaRequest, Response, Router} from "./middleware/Router";
 import {APIGatewayEventRequestContext} from "aws-lambda";
+import "reflect-metadata";
 
 const METADATA_CLASS_KEY: string = "ea_metadata_class";
 const METADATA_METHOD_KEY: string = "ea_metadata_";
@@ -38,36 +39,20 @@ export interface Result {
 
 export function Controller<T extends any>(controllerParams: ControllerParams) {
 	return (target: any) => {
-		let original = target;
-
-		function construct(constructor: any, args: any[]) {
-			let c: any = function () {
-				return new constructor(args);
-			};
-			c.prototype = constructor.prototype;
-			return new c();
+		const res = new target();
+		initClassTarget(res);
+		for (let subRoute of res.__proto__[METADATA_CLASS_KEY].methods) {
+			controllerParams.router.add(controllerParams.exports, subRoute.name, async (req: LambdaRequest<any>, response: Response, context: APIGatewayEventRequestContext) => subRoute.value(req, response, res));
 		}
-
-		let f: any = function (...args: any[]) {
-			initClassTarget(original.prototype);
-			original.prototype[METADATA_CLASS_KEY].defaultJson = controllerParams.json;
-
-			let res = construct(original, args);
-			for (let subRoute of original.prototype[METADATA_CLASS_KEY].methods) {
-				controllerParams.router.add(controllerParams.exports, subRoute.name, async (req: LambdaRequest<any>, response: Response, context: APIGatewayEventRequestContext) => subRoute.value(req, response, res));
-			}
-			return res;
-		};
-
-		f.prototype = original.prototype;
-		f();
-		return f;
 	}
 }
 
-function getProperValue(value: string | null, targetType: string) {
+function getProperValue(value: string | null, targetType: string | Function) {
 	if (!value) {
 		return value;
+	}
+	if (typeof targetType === "function") {
+		return targetType(value);
 	}
 	switch (targetType) {
 		case "boolean":
@@ -144,7 +129,7 @@ function handleMethod<T extends any>(routeValues: ControllerValues, target: T, k
 		});
 	};
 	initClassTarget(target);
-	target[METADATA_CLASS_KEY].methods.push({
+	target.__proto__[METADATA_CLASS_KEY].methods.push({
 		name: key,
 		value: descriptor.value
 	});
@@ -158,8 +143,8 @@ export function Method<T extends any>(routeValues: ControllerValues = {}) {
 }
 
 function initClassTarget(target: any) {
-	if (!target[METADATA_CLASS_KEY]) {
-		target[METADATA_CLASS_KEY] = {methods: [], defaultJson: false, isServerClass: false};
+	if (!target.__proto__[METADATA_CLASS_KEY]) {
+		target.__proto__[METADATA_CLASS_KEY] = {methods: [], defaultJson: false, isServerClass: false};
 	}
 }
 
@@ -192,12 +177,12 @@ export function header(paramName?: string) {
 }
 
 /**
- * Get a path parameter property
+ * Get a path parameter property, the parameter will be cast using the Reflect typescript library
  * @param paramName the name of the property to get (optional)
- * @param type can be boolean, integer or float, in case of boolean, it checks that the value equals "true", for integer it apply a parseInt, for float a parseFloat (optional)
  */
-export function param(paramName?: string, type: string = "string") {
+export function param(paramName?: string) {
 	return (target: any, key: string, index: number) => {
+		const type = getType(target, key, index);
 		let _paramName = paramName;
 		if (!_paramName) {
 			_paramName = getParamNames(target[key])[index];
@@ -216,12 +201,12 @@ export function body() {
 }
 
 /**
- * Get a query property
+ * Get a query property, the property will be cast using the Reflect typescript library
  * @param paramName the name of the property to get (optional)
- * @param type can be boolean, integer or float, in case of boolean, it checks that the value equals "true", for integer it apply a parseInt, for float a parseFloat (optional)
  */
-export function query(paramName?: string, type: string = "string") {
+export function query(paramName?: string) {
 	return (target: any, key: string, index: number) => {
+		let type = getType(target, key, index);
 		let _paramName = paramName;
 		if (!_paramName) {
 			_paramName = getParamNames(target[key])[index];
@@ -234,13 +219,25 @@ export function query(paramName?: string, type: string = "string") {
  * Get a property inside the request handled by the middleware
  * @param paramName The name of the property to get
  */
+
 export function custom(paramName: string) {
 	return (target: any, key: string, index: number) => {
 		addProperty(target, key, index, "custom", paramName);
 	}
 }
 
-function addProperty(target: any, key: string, index: number, type: string, reqName?: string, targetType: string = "string") {
+function getType<T>(target: T, key: string, index: number) {
+	let type = null;
+	if (Reflect.hasMetadata("design:paramtypes", target, key)) {
+		const types = Reflect.getMetadata("design:paramtypes", target, key)
+		if (types.length > index) {
+			type = types[index];
+		}
+	}
+	return type;
+}
+
+function addProperty(target: any, key: string, index: number, type: string, reqName?: string, targetType: string | Function = "string") {
 	let metadataKey = `${METADATA_METHOD_KEY}${key}`;
 	if (!target[metadataKey]) {
 		target[metadataKey] = [];

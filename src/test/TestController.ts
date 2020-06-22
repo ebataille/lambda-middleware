@@ -1,11 +1,12 @@
-import {Controller, Method, query} from "../Annotations";
+import {Controller, Method, ParamTypes, query} from "../Annotations";
 import {Router} from "../middleware/Router";
 
 
-@Controller({exports, router: new Router([]), json: true})
-class TestController {
+@Controller({router: new Router([]), exports})
+export class TestController {
 
 	foo: string = "bar";
+
 
 	private static readonly STATIC_PROPERTY: string = "STATIC_PROPERTY";
 
@@ -16,7 +17,7 @@ class TestController {
 	}
 
 	@Method()
-	async testQuery(@query() name: string, @query("age", "float") age: number) {
+	async testQuery(@query() name: string, @query() age: number) {
 		return {name, age};
 	}
 

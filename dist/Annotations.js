@@ -126,19 +126,15 @@ function initClassTarget(target) {
 /**
  * get the @type LambdaRequest object
  */
-function request() {
-    return (target, key, index) => {
-        addProperty(target, key, index, "request");
-    };
+function request(target, key, index) {
+    addProperty(target, key, index, "request");
 }
 exports.request = request;
 /**
  * Get the @type Response object
  */
-function response() {
-    return (target, key, index) => {
-        addProperty(target, key, index, "response");
-    };
+function response(target, key, index) {
+    addProperty(target, key, index, "response");
 }
 exports.response = response;
 /**
@@ -169,10 +165,8 @@ exports.param = param;
 /**
  * get the body of the request, if the body is a json, return the json, the plain text else
  */
-function body() {
-    return (target, key, index) => {
-        addProperty(target, key, index, "body");
-    };
+function body(target, key, index) {
+    addProperty(target, key, index, "body");
 }
 exports.body = body;
 /**
@@ -196,7 +190,11 @@ exports.query = query;
  */
 function custom(paramName) {
     return (target, key, index) => {
-        addProperty(target, key, index, "custom", paramName);
+        let _paramName = paramName;
+        if (!_paramName) {
+            _paramName = getParamNames(target[key])[index];
+        }
+        addProperty(target, key, index, "custom", _paramName);
     };
 }
 exports.custom = custom;

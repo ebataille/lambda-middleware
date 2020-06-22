@@ -1,6 +1,6 @@
 {
 	"name": "@igloobuster/aws_lambda_middleware",
-	"version": "0.1.4",
+	"version": "0.1.5",
 	"description": "Middleware and annotation for AWS Lambda",
 	"keywords": [
 		"AWS",

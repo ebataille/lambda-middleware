@@ -152,19 +152,15 @@ function initClassTarget(target: any) {
 /**
  * get the @type LambdaRequest object
  */
-export function request() {
-	return (target: any, key: string, index: number) => {
-		addProperty(target, key, index, "request");
-	}
+export function request(target: any, key: string, index: number) {
+	addProperty(target, key, index, "request");
 }
 
 /**
  * Get the @type Response object
  */
-export function response() {
-	return (target: any, key: string, index: number) => {
-		addProperty(target, key, index, "response");
-	}
+export function response(target: any, key: string, index: number) {
+	addProperty(target, key, index, "response");
 }
 
 /**
@@ -195,10 +191,8 @@ export function param(paramName?: string) {
 /**
  * get the body of the request, if the body is a json, return the json, the plain text else
  */
-export function body() {
-	return (target: any, key: string, index: number) => {
-		addProperty(target, key, index, "body");
-	}
+export function body(target: any, key: string, index: number) {
+	addProperty(target, key, index, "body");
 }
 
 /**
@@ -221,9 +215,13 @@ export function query(paramName?: string) {
  * @param paramName The name of the property to get
  */
 
-export function custom(paramName: string) {
+export function custom(paramName?: string) {
 	return (target: any, key: string, index: number) => {
-		addProperty(target, key, index, "custom", paramName);
+		let _paramName = paramName;
+		if (!_paramName) {
+			_paramName = getParamNames(target[key])[index];
+		}
+		addProperty(target, key, index, "custom", _paramName);
 	}
 }
 

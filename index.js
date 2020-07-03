@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
  */
 module.exports = {
-	annotations: require("./dist/ExpressAnnotations"),
+	annotations: require("./dist/Annotations"),
 	bodyParser: require("./dist/middleware/BodyParserMiddleware"),
 	cookieParser: require("./dist/middleware/CookieParser"),
 	gzip: require("./dist/middleware/GzipMiddleware"),

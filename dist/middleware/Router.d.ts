@@ -3,8 +3,12 @@ export declare class Router {
     private middlewares;
     constructor(middlewares?: AbstractMiddleware<any>[]);
     private chainMiddlewares;
+    private preHandle;
+    private catchError;
     handler: (finalHandler: (event: LambdaRequest<any>, response: Response, context: APIGatewayEventRequestContext) => Promise<any>) => (event: LambdaRequest<any>, context: APIGatewayEventRequestContext, callback: Function) => Promise<void>;
+    classHandler: (classHandler: any, name: string) => (event: LambdaRequest<any>, context: APIGatewayEventRequestContext, callback: Function) => Promise<void>;
     add(exports: any, name: string, handler: (event: LambdaRequest<any>, response: Response, context: APIGatewayEventRequestContext) => Promise<any>): void;
+    addClass(exports: any, name: string, handler: Function): void;
 }
 export declare class Response {
     private req;

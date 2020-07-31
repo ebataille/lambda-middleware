@@ -15,26 +15,26 @@ class Router {
     constructor(middlewares = []) {
         this.middlewares = middlewares;
         this.handler = (finalHandler) => (event, context, callback) => __awaiter(this, void 0, void 0, function* () {
-            const response = new Response(event);
-            context.callbackWaitsForEmptyEventLoop = false;
-            event.queryStringParameters = event.queryStringParameters || {};
-            event.pathParameters = event.pathParameters || {};
-            event.headers = event.headers || {};
+            const response = this.preHandle(event, context);
             try {
                 yield this.chainMiddlewares(this.middlewares, response, finalHandler)(event, context);
                 callback(null, response.getResponse());
             }
             catch (err) {
-                console.log(err);
-                if (err.error && err.statusCode) {
-                    response.setStatusCode(err.statusCode);
-                    response.json(err.error);
-                }
-                else {
-                    response.setStatusCode(500);
-                    response.json(err.body ? err.body : (err.message ? err.message : err));
-                }
+                this.catchError(err, response, callback);
+            }
+        });
+        this.classHandler = (classHandler, name) => (event, context, callback) => __awaiter(this, void 0, void 0, function* () {
+            const response = this.preHandle(event, context);
+            try {
+                yield this.chainMiddlewares(this.middlewares, response, (event, response, context) => {
+                    const obj = new classHandler(event, response);
+                    return obj[name].apply(obj, [event, response, obj]);
+                })(event, context);
                 callback(null, response.getResponse());
+            }
+            catch (err) {
+                this.catchError(err, response, callback);
             }
         });
     }
@@ -56,8 +56,31 @@ class Router {
             return finalHandler(event, response, context);
         };
     }
+    preHandle(event, context) {
+        const response = new Response(event);
+        context.callbackWaitsForEmptyEventLoop = false;
+        event.queryStringParameters = event.queryStringParameters || {};
+        event.pathParameters = event.pathParameters || {};
+        event.headers = event.headers || {};
+        return response;
+    }
+    catchError(err, response, callback) {
+        console.log(err);
+        if (err.error && err.statusCode) {
+            response.setStatusCode(err.statusCode);
+            response.json(err.error);
+        }
+        else {
+            response.setStatusCode(500);
+            response.json(err.body ? err.body : (err.message ? err.message : err));
+        }
+        callback(null, response.getResponse());
+    }
     add(exports, name, handler) {
         exports[name] = this.handler(handler);
+    }
+    addClass(exports, name, handler) {
+        exports[name] = this.classHandler(handler, name);
     }
 }
 exports.Router = Router;

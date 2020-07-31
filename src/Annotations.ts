@@ -37,6 +37,16 @@ export interface Result {
 	headers?: any[];
 }
 
+export function ClassController<T extends any>(controllerParams: ControllerParams) {
+	return (target: any) => {
+		initClassTarget(target);
+		target.__proto__[METADATA_CLASS_KEY].defaultJson = controllerParams.json
+		for (let subRoute of target.__proto__[METADATA_CLASS_KEY].methods) {
+			controllerParams.router.addClass(controllerParams.exports, subRoute.name, target);
+		}
+	}
+}
+
 export function Controller<T extends any>(controllerParams: ControllerParams) {
 	return (target: any) => {
 		const res = new target();

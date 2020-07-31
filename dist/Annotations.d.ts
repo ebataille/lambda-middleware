@@ -14,6 +14,7 @@ export interface Result {
     body: any;
     headers?: any[];
 }
+export declare function ClassController<T extends any>(controllerParams: ControllerParams): (target: any) => void;
 export declare function Controller<T extends any>(controllerParams: ControllerParams): (target: any) => void;
 export declare function Method<T extends any>(routeValues?: ControllerValues): (target: T, key: string, descriptor: TypedPropertyDescriptor<(...args: any[]) => Promise<any>>) => TypedPropertyDescriptor<(...args: any[]) => Promise<any>> | undefined;
 /**

@@ -9,6 +9,12 @@ Middleware and annotations in typescript for AWS lambda
 npm install --save @igloobuster/aws_lambda_middleware
 ```
 
+## Changelog
+
+* v0.1.7
+  * Adding addClass to the router to have one class instance per request
+  * Adding the annotation ClassController wich add a class to the router
+
 ## how It works
 
 Lambda middleware provide a way to chain middleware for AWS lambda before executing the request
@@ -54,6 +60,34 @@ private async hello(req: LambdaRequest<any>, response: Response) {
 	response.json({hello: req.pathParameters, body: req.json, age: req.queryStringParameters.age});
 }
 ```
+
+### Declare Class handlers (v0.1.7+)
+
+If you need to have one instance per request you can use ```router.addClass``` instead of adding method.
+You need to add every method inside your class in order to get it work
+
+For example :
+
+```typescript
+import {Router, LambdaRequest, Response} from "@igloobuster/aws_lambda_middleware/dist/middleware/Router";
+import {BodyParserMiddleware} from "@igloobuster/aws_lambda_middleware/dist/middleware/BodyParserMiddleware";
+
+class ClassControllerExample {
+	
+    constructor (req : LambdaRequest<any>, response : Response) {
+		// Here we can initialize our class with the request if needed
+	}
+
+	public async echo(req: LambdaRequest<any>, response: Response) {
+		console.log(req.json);
+		response.json({...req.json});
+	}
+}
+
+const router = new Router([new BodyParserMiddleware()]);
+router.addClass(exports, "echo", ClassControllerExample);
+```
+
 ### Build your own middlewares
 
 Let's say for example that you need to response with cors headers.
@@ -106,6 +140,26 @@ import {Router} from "@igloobuster/aws_lambda_middleware/dist/middleware/Router"
 
 @Controller({exports, json: true, router: new Router([new BodyParserMiddleware()])})
 export class HelloController {
+
+	@Method()
+	private async hello(@param() name: string, @query() age: number = 21) {
+		return {hello: name, age};
+	};
+}
+```
+
+If you need to have on class instance per request use ```ClassController instead of controller```
+```typescript
+import {BodyParserMiddleware} from "@igloobuster/aws_lambda_middleware/dist/middleware/BodyParserMiddleware";
+import {ClassController, Method, param, query} from "@igloobuster/aws_lambda_middleware/dist/Annotations";
+import {Router, LambdaRequest, Response} from "@igloobuster/aws_lambda_middleware/dist/middleware/Router"; import {LambdaRequest} from "./Router";
+
+@ClassController({exports, json: true, router: new Router([new BodyParserMiddleware()])})
+export class HelloController {
+
+    constructor (request : LambdaRequest<any>, response : Response) {
+    	// do initialization of the class here 
+    }
 
 	@Method()
 	private async hello(@param() name: string, @query() age: number = 21) {

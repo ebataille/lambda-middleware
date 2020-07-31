@@ -40,30 +40,56 @@ export class Router {
 		}
 	}
 
-	public handler = (finalHandler: (event: LambdaRequest<any>, response: Response, context: APIGatewayEventRequestContext) => Promise<any>) => async (event: LambdaRequest<any>, context: APIGatewayEventRequestContext, callback: Function) => {
+	private preHandle(event: LambdaRequest<any>, context: APIGatewayEventRequestContext) {
 		const response = new Response(event);
 		(<any>context).callbackWaitsForEmptyEventLoop = false;
 		event.queryStringParameters = event.queryStringParameters || {};
 		event.pathParameters = event.pathParameters || {};
 		event.headers = event.headers || {};
+		return response;
+	}
+
+	private catchError(err: any, response: Response, callback: Function) {
+		console.log(err);
+		if (err.error && err.statusCode) {
+			response.setStatusCode(err.statusCode);
+			response.json(err.error);
+		} else {
+			response.setStatusCode(500);
+			response.json(err.body ? err.body : (err.message ? err.message : err));
+		}
+		callback(null, response.getResponse());
+	}
+
+	public handler = (finalHandler: (event: LambdaRequest<any>, response: Response, context: APIGatewayEventRequestContext) => Promise<any>) => async (event: LambdaRequest<any>, context: APIGatewayEventRequestContext, callback: Function) => {
+		const response = this.preHandle(event, context);
 		try {
 			await this.chainMiddlewares(this.middlewares, response, finalHandler)(event, context);
 			callback(null, response.getResponse());
 		} catch (err) {
-			console.log(err);
-			if (err.error && err.statusCode) {
-				response.setStatusCode(err.statusCode);
-				response.json(err.error);
-			} else {
-				response.setStatusCode(500);
-				response.json(err.body ? err.body : (err.message ? err.message : err));
-			}
-			callback(null, response.getResponse())
+			this.catchError(err, response, callback);
+		}
+	};
+
+	public classHandler = (classHandler: any, name: string) => async (event: LambdaRequest<any>, context: APIGatewayEventRequestContext, callback: Function) => {
+		const response = this.preHandle(event, context);
+		try {
+			await this.chainMiddlewares(this.middlewares, response, (event, response, context) => {
+				const obj = new classHandler(event, response);
+				return obj[name].apply(obj, [event, response, obj]);
+			})(event, context);
+			callback(null, response.getResponse());
+		} catch (err) {
+			this.catchError(err, response, callback);
 		}
 	};
 
 	public add(exports: any, name: string, handler: (event: LambdaRequest<any>, response: Response, context: APIGatewayEventRequestContext) => Promise<any>) {
 		exports[name] = this.handler(handler);
+	}
+
+	public addClass(exports: any, name: string, handler: Function) {
+		exports[name] = this.classHandler(handler, name);
 	}
 }
 

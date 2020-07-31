@@ -12,6 +12,16 @@ Object.defineProperty(exports, "__esModule", { value: true });
 require("reflect-metadata");
 const METADATA_CLASS_KEY = "ea_metadata_class";
 const METADATA_METHOD_KEY = "ea_metadata_";
+function ClassController(controllerParams) {
+    return (target) => {
+        initClassTarget(target);
+        target.__proto__[METADATA_CLASS_KEY].defaultJson = controllerParams.json;
+        for (let subRoute of target.__proto__[METADATA_CLASS_KEY].methods) {
+            controllerParams.router.addClass(controllerParams.exports, subRoute.name, target);
+        }
+    };
+}
+exports.ClassController = ClassController;
 function Controller(controllerParams) {
     return (target) => {
         const res = new target();

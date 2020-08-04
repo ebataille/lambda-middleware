@@ -22,6 +22,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 var TestController_1;
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.TestController = void 0;
 const Annotations_1 = require("../Annotations");
 const Router_1 = require("../middleware/Router");
 let TestController = TestController_1 = class TestController {

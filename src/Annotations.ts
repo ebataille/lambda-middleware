@@ -240,7 +240,8 @@ function getType<T>(target: T, key: string, index: number) {
 	if (Reflect.hasMetadata("design:paramtypes", target, key)) {
 		const types = Reflect.getMetadata("design:paramtypes", target, key)
 		if (types.length > index) {
-			type = types[index];
+			// exception for Boolean because Boolean("false") === true
+			type = types[index] === Boolean ? "boolean" : types[index];
 		}
 	}
 	return type;

@@ -11,6 +11,9 @@ npm install --save @igloobuster/aws_lambda_middleware
 
 ## Changelog
 
+* v0.1.8
+  * Bug Fix on boolean params that were not cast properly
+
 * v0.1.7
   * Adding addClass to the router to have one class instance per request
   * Adding the annotation ClassController wich add a class to the router

@@ -122,6 +122,9 @@ function handleMethod<T extends any>(routeValues: ControllerValues, target: T, k
 		}
 
 		return (<any>originalMethod).apply(objectTarget, params).then((result: Result | any) => {
+			if (routeValues.noResponse) {
+				return;
+			}
 			if (result.hasOwnProperty("headers")) {
 				let headers = result["headers"];
 				for (let prop in headers) {
@@ -134,7 +137,7 @@ function handleMethod<T extends any>(routeValues: ControllerValues, target: T, k
 				response.setStatusCode(result && (result.hasOwnProperty("status") ? result.status : result));
 			} else if (routeValues.json || (target.__proto__[METADATA_CLASS_KEY].defaultJson && !routeValues.noResponse)) {
 				response.json(result && (result.hasOwnProperty("body") ? result.body : result));
-			} else if (!routeValues.noResponse) {
+			} else {
 				response.send(result && (result.body ? result.body : result));
 			}
 		});

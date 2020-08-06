@@ -172,6 +172,7 @@ export class Response {
 		// Respond
 		this._statusCode = statusCode;
 		this.setHeader('Content-Length', "0");
+		this.setHeader('Location', url);
 	}
 
 	public cookie(name: string, value: string, options: any) {

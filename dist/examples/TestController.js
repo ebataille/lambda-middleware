@@ -40,6 +40,11 @@ let TestController = TestController_1 = class TestController {
             return { name, age };
         });
     }
+    noResponse(response) {
+        return __awaiter(this, void 0, void 0, function* () {
+            response.redirect("https://www.example.com");
+        });
+    }
     doSomething() {
         return { hello: this.foo, staticProp: TestController_1.STATIC_PROPERTY };
     }
@@ -58,6 +63,13 @@ __decorate([
     __metadata("design:paramtypes", [String, Number]),
     __metadata("design:returntype", Promise)
 ], TestController.prototype, "testQuery", null);
+__decorate([
+    Annotations_1.Method({ noResponse: true }),
+    __param(0, Annotations_1.response),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Router_1.Response]),
+    __metadata("design:returntype", Promise)
+], TestController.prototype, "noResponse", null);
 TestController = TestController_1 = __decorate([
     Annotations_1.Controller({ router: new Router_1.Router([]), exports, json: true })
 ], TestController);

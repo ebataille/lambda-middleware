@@ -1,8 +1,8 @@
-import {Controller, Method, query} from "../Annotations";
-import {Router} from "../middleware/Router";
+import {Controller, Method, query, response} from "../Annotations";
+import {Router, Response} from "../middleware/Router";
 
 
-@Controller({router: new Router([]), exports, json:true})
+@Controller({router: new Router([]), exports, json: true})
 export class TestController {
 
 	foo: string = "bar";
@@ -19,6 +19,11 @@ export class TestController {
 	@Method()
 	async testQuery(@query() name: string, @query() age: number) {
 		return {name, age};
+	}
+
+	@Method({noResponse: true})
+	async noResponse(@response response: Response) {
+		response.redirect("https://www.example.com");
 	}
 
 	doSomething() {

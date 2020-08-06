@@ -9,7 +9,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.custom = exports.query = exports.body = exports.param = exports.header = exports.response = exports.request = exports.Method = exports.Controller = exports.ClassController = void 0;
 require("reflect-metadata");
 const METADATA_CLASS_KEY = "ea_metadata_class";
 const METADATA_METHOD_KEY = "ea_metadata_";
@@ -97,6 +96,9 @@ function handleMethod(routeValues, target, key, descriptor) {
             }
         }
         return originalMethod.apply(objectTarget, params).then((result) => {
+            if (routeValues.noResponse) {
+                return;
+            }
             if (result.hasOwnProperty("headers")) {
                 let headers = result["headers"];
                 for (let prop in headers) {
@@ -111,7 +113,7 @@ function handleMethod(routeValues, target, key, descriptor) {
             else if (routeValues.json || (target.__proto__[METADATA_CLASS_KEY].defaultJson && !routeValues.noResponse)) {
                 response.json(result && (result.hasOwnProperty("body") ? result.body : result));
             }
-            else if (!routeValues.noResponse) {
+            else {
                 response.send(result && (result.body ? result.body : result));
             }
         });

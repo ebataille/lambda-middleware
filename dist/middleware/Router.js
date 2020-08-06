@@ -148,6 +148,7 @@ class Response {
         // Respond
         this._statusCode = statusCode;
         this.setHeader('Content-Length', "0");
+        this.setHeader('Location', url);
     }
     cookie(name, value, options) {
         const signed = options.signed || false;

@@ -10,6 +10,9 @@ npm install --save @igloobuster/aws_lambda_middleware
 ```
 
 ## Changelog
+* v0.1.9
+  * Bug Fix on noResponse
+  * Bug Fix on missing location header on response.redirect
 
 * v0.1.8
   * Bug Fix on boolean params that were not cast properly

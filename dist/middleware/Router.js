@@ -1,13 +1,4 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AbstractMiddleware = exports.Response = exports.Router = void 0;
 const cookie = require("cookie");
@@ -15,20 +6,20 @@ const cookie_signature_1 = require("cookie-signature");
 class Router {
     constructor(middlewares = []) {
         this.middlewares = middlewares;
-        this.handler = (finalHandler) => (event, context, callback) => __awaiter(this, void 0, void 0, function* () {
+        this.handler = (finalHandler) => async (event, context, callback) => {
             const response = this.preHandle(event, context);
             try {
-                yield this.chainMiddlewares(this.middlewares, response, finalHandler)(event, context);
+                await this.chainMiddlewares(this.middlewares, response, finalHandler)(event, context);
                 callback(null, response.getResponse());
             }
             catch (err) {
                 this.catchError(err, response, callback);
             }
-        });
-        this.classHandler = (classHandler, name) => (event, context, callback) => __awaiter(this, void 0, void 0, function* () {
+        };
+        this.classHandler = (classHandler, name) => async (event, context, callback) => {
             const response = this.preHandle(event, context);
             try {
-                yield this.chainMiddlewares(this.middlewares, response, (event, response, context) => {
+                await this.chainMiddlewares(this.middlewares, response, (event, response, context) => {
                     const obj = new classHandler(event, response);
                     return obj[name].apply(obj, [event, response, obj]);
                 })(event, context);
@@ -37,7 +28,7 @@ class Router {
             catch (err) {
                 this.catchError(err, response, callback);
             }
-        });
+        };
     }
     chainMiddlewares([firstMiddleware, ...rest], response, finalHandler) {
         if (firstMiddleware) {
@@ -137,7 +128,11 @@ class Response {
         };
     }
     clearCookie(name, options) {
-        let opts = Object.assign(Object.assign({}, options), { expires: new Date(1), path: '/' });
+        let opts = {
+            ...options,
+            expires: new Date(1),
+            path: '/'
+        };
         return this.cookie(name, '', opts);
     }
     send(res) {
@@ -153,7 +148,9 @@ class Response {
     cookie(name, value, options) {
         const signed = options.signed || false;
         const secret = this.req.secret;
-        let opts = Object.assign({}, options);
+        let opts = {
+            ...options
+        };
         if (signed && !secret) {
             throw new Error('cookieParser("secret") required for signed cookies');
         }
@@ -174,19 +171,18 @@ class Response {
 }
 exports.Response = Response;
 class AbstractMiddleware {
-    execute(event, context, response, next) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const request = event;
-                yield this.before(request, context, response);
-                const result = next(request, context);
-                yield this.after(request, context, response);
-                return result;
-            }
-            catch (err) {
-                this.error(event, context, response, err);
-            }
-        });
+    async execute(event, context, response, next) {
+        try {
+            const request = event;
+            await this.before(request, context, response);
+            const result = await next(request, context);
+            await this.after(request, context, response);
+            return result;
+        }
+        catch (err) {
+            this.error(event, context, response, err);
+            throw err;
+        }
     }
     error(event, context, response, err) {
         console.log(err);

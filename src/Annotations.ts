@@ -86,11 +86,14 @@ function handleMethod<T extends any>(routeValues: ControllerValues, target: T, k
 	}
 	let originalMethod = descriptor.value;
 	let metadataKey = `${METADATA_METHOD_KEY}${key}`;
+	// @ts-ignore
 	if (!target[metadataKey]) {
+		// @ts-ignore
 		target[metadataKey] = [];
 	}
 	descriptor.value = (request: LambdaRequest<any>, response: Response, objectTarget: any): Promise<Result | any> => {
 		let params = [];
+		// @ts-ignore
 		for (let p of target[metadataKey]) {
 			switch (p.type) {
 				case "params":
@@ -135,14 +138,17 @@ function handleMethod<T extends any>(routeValues: ControllerValues, target: T, k
 			}
 			if (routeValues.status) {
 				response.setStatusCode(result && (result.hasOwnProperty("status") ? result.status : result));
-			} else if (routeValues.json || (target.__proto__[METADATA_CLASS_KEY].defaultJson && !routeValues.noResponse)) {
-				response.json(result && (result.hasOwnProperty("body") ? result.body : result));
-			} else {
-				response.send(result && (result.body ? result.body : result));
+			} else { // @ts-ignore
+				if (routeValues.json || (target.__proto__[METADATA_CLASS_KEY].defaultJson && !routeValues.noResponse)) {
+					response.json(result && (result.hasOwnProperty("body") ? result.body : result));
+				} else {
+					response.send(result && (result.body ? result.body : result));
+				}
 			}
 		});
 	};
 	initClassTarget(target);
+	// @ts-ignore
 	target.__proto__[METADATA_CLASS_KEY].methods.push({
 		name: key,
 		value: descriptor.value

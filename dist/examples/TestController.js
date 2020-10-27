@@ -11,15 +11,6 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 var TestController_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TestController = void 0;
@@ -29,21 +20,15 @@ let TestController = TestController_1 = class TestController {
     constructor() {
         this.foo = "bar";
     }
-    test() {
-        return __awaiter(this, void 0, void 0, function* () {
-            console.log(this);
-            return this.doSomething();
-        });
+    async test() {
+        console.log(this);
+        return this.doSomething();
     }
-    testQuery(name, age) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return { name, age };
-        });
+    async testQuery(name, age) {
+        return { name, age };
     }
-    noResponse(response) {
-        return __awaiter(this, void 0, void 0, function* () {
-            response.redirect("https://www.example.com");
-        });
+    async noResponse(response) {
+        response.redirect("https://www.example.com");
     }
     doSomething() {
         return { hello: this.foo, staticProp: TestController_1.STATIC_PROPERTY };

@@ -212,11 +212,12 @@ export abstract class AbstractMiddleware<T> {
 		try {
 			const request = event as LambdaRequest<T>
 			await this.before(request, context, response);
-			const result = next(request, context);
+			const result = await next(request, context);
 			await this.after(request, context, response);
 			return result;
 		} catch (err) {
 			this.error(event, context, response, err);
+			throw err;
 		}
 	}
 

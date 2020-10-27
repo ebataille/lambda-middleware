@@ -1,13 +1,4 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CookieParser = void 0;
 /*
@@ -32,17 +23,13 @@ class CookieParser extends Router_1.AbstractMiddleware {
         super();
         this.parser = cookieParser(secret);
     }
-    after(event, context, response) {
-        return __awaiter(this, void 0, void 0, function* () {
-        });
+    async after(event, context, response) {
     }
-    before(event, context, response) {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (event.headers) {
-                this.parser(event, {}, () => {
-                });
-            }
-        });
+    async before(event, context, response) {
+        if (event.headers) {
+            this.parser(event, {}, () => {
+            });
+        }
     }
 }
 exports.CookieParser = CookieParser;

@@ -1,14 +1,6 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.custom = exports.query = exports.body = exports.param = exports.header = exports.response = exports.request = exports.Method = exports.Controller = exports.ClassController = void 0;
 require("reflect-metadata");
 const METADATA_CLASS_KEY = "ea_metadata_class";
 const METADATA_METHOD_KEY = "ea_metadata_";
@@ -28,7 +20,7 @@ function Controller(controllerParams) {
         initClassTarget(res);
         res.__proto__[METADATA_CLASS_KEY].defaultJson = controllerParams.json;
         for (let subRoute of res.__proto__[METADATA_CLASS_KEY].methods) {
-            controllerParams.router.add(controllerParams.exports, subRoute.name, (req, response, context) => __awaiter(this, void 0, void 0, function* () { return subRoute.value(req, response, res); }));
+            controllerParams.router.add(controllerParams.exports, subRoute.name, async (req, response, context) => subRoute.value(req, response, res));
         }
     };
 }
@@ -60,11 +52,14 @@ function handleMethod(routeValues, target, key, descriptor) {
     }
     let originalMethod = descriptor.value;
     let metadataKey = `${METADATA_METHOD_KEY}${key}`;
+    // @ts-ignore
     if (!target[metadataKey]) {
+        // @ts-ignore
         target[metadataKey] = [];
     }
     descriptor.value = (request, response, objectTarget) => {
         let params = [];
+        // @ts-ignore
         for (let p of target[metadataKey]) {
             switch (p.type) {
                 case "params":
@@ -110,15 +105,18 @@ function handleMethod(routeValues, target, key, descriptor) {
             if (routeValues.status) {
                 response.setStatusCode(result && (result.hasOwnProperty("status") ? result.status : result));
             }
-            else if (routeValues.json || (target.__proto__[METADATA_CLASS_KEY].defaultJson && !routeValues.noResponse)) {
-                response.json(result && (result.hasOwnProperty("body") ? result.body : result));
-            }
-            else {
-                response.send(result && (result.body ? result.body : result));
+            else { // @ts-ignore
+                if (routeValues.json || (target.__proto__[METADATA_CLASS_KEY].defaultJson && !routeValues.noResponse)) {
+                    response.json(result && (result.hasOwnProperty("body") ? result.body : result));
+                }
+                else {
+                    response.send(result && (result.body ? result.body : result));
+                }
             }
         });
     };
     initClassTarget(target);
+    // @ts-ignore
     target.__proto__[METADATA_CLASS_KEY].methods.push({
         name: key,
         value: descriptor.value

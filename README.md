@@ -10,6 +10,9 @@ npm install --save @igloobuster/aws_lambda_middleware
 ```
 
 ## Changelog
+* v1.0.1
+  * Bug Fix on Node12.19+, __proto__ made http_agent crash, change it by a Map and className
+
 * v0.1.9
   * Bug Fix on noResponse
   * Bug Fix on missing location header on response.redirect

@@ -2,13 +2,14 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.custom = exports.query = exports.body = exports.param = exports.header = exports.response = exports.request = exports.Method = exports.Controller = exports.ClassController = void 0;
 require("reflect-metadata");
-const METADATA_CLASS_KEY = "ea_metadata_class";
 const METADATA_METHOD_KEY = "ea_metadata_";
+const metadataClass = new Map();
 function ClassController(controllerParams) {
     return (target) => {
         initClassTarget(target);
-        target.__proto__[METADATA_CLASS_KEY].defaultJson = controllerParams.json;
-        for (let subRoute of target.__proto__[METADATA_CLASS_KEY].methods) {
+        const metadata = getMetadata(target);
+        metadata.defaultJson = controllerParams.json;
+        for (let subRoute of metadata.methods) {
             controllerParams.router.addClass(controllerParams.exports, subRoute.name, target);
         }
     };
@@ -18,8 +19,9 @@ function Controller(controllerParams) {
     return (target) => {
         const res = new target();
         initClassTarget(res);
-        res.__proto__[METADATA_CLASS_KEY].defaultJson = controllerParams.json;
-        for (let subRoute of res.__proto__[METADATA_CLASS_KEY].methods) {
+        const metadata = getMetadata(target);
+        metadata.defaultJson = controllerParams.json;
+        for (let subRoute of metadata.methods) {
             controllerParams.router.add(controllerParams.exports, subRoute.name, async (req, response, context) => subRoute.value(req, response, res));
         }
     };
@@ -106,7 +108,7 @@ function handleMethod(routeValues, target, key, descriptor) {
                 response.setStatusCode(result && (result.hasOwnProperty("status") ? result.status : result));
             }
             else { // @ts-ignore
-                if (routeValues.json || (target.__proto__[METADATA_CLASS_KEY].defaultJson && !routeValues.noResponse)) {
+                if (routeValues.json || (getMetadata(target).defaultJson && !routeValues.noResponse)) {
                     response.json(result && (result.hasOwnProperty("body") ? result.body : result));
                 }
                 else {
@@ -117,7 +119,7 @@ function handleMethod(routeValues, target, key, descriptor) {
     };
     initClassTarget(target);
     // @ts-ignore
-    target.__proto__[METADATA_CLASS_KEY].methods.push({
+    getMetadata(target).methods.push({
         name: key,
         value: descriptor.value
     });
@@ -129,9 +131,14 @@ function Method(routeValues = {}) {
     };
 }
 exports.Method = Method;
+function getMetadata(target) {
+    const name = target.name || target.constructor.name;
+    return metadataClass.get(name);
+}
 function initClassTarget(target) {
-    if (!target.__proto__[METADATA_CLASS_KEY]) {
-        target.__proto__[METADATA_CLASS_KEY] = { methods: [], defaultJson: false, isServerClass: false };
+    const name = target.name || target.constructor.name;
+    if (!metadataClass.has(name)) {
+        metadataClass.set(name, { methods: [], defaultJson: false, isServerClass: false });
     }
 }
 /**

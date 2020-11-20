@@ -17,7 +17,6 @@ import {LambdaRequest, Response, Router} from "./middleware/Router";
 import {APIGatewayEventRequestContext} from "aws-lambda";
 import "reflect-metadata";
 
-const METADATA_CLASS_KEY: string = "ea_metadata_class";
 const METADATA_METHOD_KEY: string = "ea_metadata_";
 
 export interface ControllerParams {
@@ -37,11 +36,14 @@ export interface Result {
 	headers?: any[];
 }
 
+const metadataClass: Map<any, any> = new Map()
+
 export function ClassController<T extends any>(controllerParams: ControllerParams) {
 	return (target: any) => {
 		initClassTarget(target);
-		target.__proto__[METADATA_CLASS_KEY].defaultJson = controllerParams.json
-		for (let subRoute of target.__proto__[METADATA_CLASS_KEY].methods) {
+		const metadata = getMetadata(target);
+		metadata.defaultJson = controllerParams.json
+		for (let subRoute of metadata.methods) {
 			controllerParams.router.addClass(controllerParams.exports, subRoute.name, target);
 		}
 	}
@@ -51,8 +53,9 @@ export function Controller<T extends any>(controllerParams: ControllerParams) {
 	return (target: any) => {
 		const res = new target();
 		initClassTarget(res);
-		res.__proto__[METADATA_CLASS_KEY].defaultJson = controllerParams.json
-		for (let subRoute of res.__proto__[METADATA_CLASS_KEY].methods) {
+		const metadata = getMetadata(target);
+		metadata.defaultJson = controllerParams.json
+		for (let subRoute of metadata.methods) {
 			controllerParams.router.add(controllerParams.exports, subRoute.name, async (req: LambdaRequest<any>, response: Response, context: APIGatewayEventRequestContext) => subRoute.value(req, response, res));
 		}
 	}
@@ -139,7 +142,8 @@ function handleMethod<T extends any>(routeValues: ControllerValues, target: T, k
 			if (routeValues.status) {
 				response.setStatusCode(result && (result.hasOwnProperty("status") ? result.status : result));
 			} else { // @ts-ignore
-				if (routeValues.json || (target.__proto__[METADATA_CLASS_KEY].defaultJson && !routeValues.noResponse)) {
+
+				if (routeValues.json || (getMetadata(target).defaultJson && !routeValues.noResponse)) {
 					response.json(result && (result.hasOwnProperty("body") ? result.body : result));
 				} else {
 					response.send(result && (result.body ? result.body : result));
@@ -149,7 +153,7 @@ function handleMethod<T extends any>(routeValues: ControllerValues, target: T, k
 	};
 	initClassTarget(target);
 	// @ts-ignore
-	target.__proto__[METADATA_CLASS_KEY].methods.push({
+	getMetadata(target).methods.push({
 		name: key,
 		value: descriptor.value
 	});
@@ -162,9 +166,15 @@ export function Method<T extends any>(routeValues: ControllerValues = {}) {
 	}
 }
 
+function getMetadata (target : any) {
+	const name = target.name || target.constructor.name;
+	return metadataClass.get(name);
+}
+
 function initClassTarget(target: any) {
-	if (!target.__proto__[METADATA_CLASS_KEY]) {
-		target.__proto__[METADATA_CLASS_KEY] = {methods: [], defaultJson: false, isServerClass: false};
+	const name = target.name || target.constructor.name;
+	if (!metadataClass.has(name)) {
+		metadataClass.set(name, {methods: [], defaultJson: false, isServerClass: false});
 	}
 }
 

@@ -20,7 +20,12 @@ export class AsyncMiddlewares extends AbstractMiddleware<any> {
 		});
 	}
 
-	protected error(event: APIGatewayProxyEvent, context: APIGatewayEventRequestContext, response: Response, err: Error) {
-		console.log(this.count, "error is called")
+	protected async error(event: APIGatewayProxyEvent, context: APIGatewayEventRequestContext, response: Response, err: Error) : Promise<any> {
+		return new Promise(resolve => {
+			setTimeout(() => {
+				console.log(this.count, "error is called")
+				resolve();
+			}, this.timeout);
+		});
 	}
 }

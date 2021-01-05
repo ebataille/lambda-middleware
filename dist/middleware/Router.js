@@ -1,25 +1,26 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AbstractMiddleware = exports.Response = exports.Router = void 0;
 const cookie = require("cookie");
 const cookie_signature_1 = require("cookie-signature");
 class Router {
     constructor(middlewares = []) {
         this.middlewares = middlewares;
-        this.handler = (finalHandler) => async (event, context, callback) => {
+        this.handler = (finalHandler, preMiddlewares = [], postMiddlewares = []) => async (event, context, callback) => {
             const response = this.preHandle(event, context);
             try {
-                await this.chainMiddlewares(this.middlewares, response, finalHandler)(event, context);
+                const fullMiddlewares = preMiddlewares.concat(this.middlewares, postMiddlewares);
+                await this.chainMiddlewares(fullMiddlewares, response, finalHandler)(event, context);
                 callback(null, response.getResponse());
             }
             catch (err) {
                 this.catchError(err, response, callback);
             }
         };
-        this.classHandler = (classHandler, name) => async (event, context, callback) => {
+        this.classHandler = (classHandler, name, preMiddlewares = [], postMiddlewares = []) => async (event, context, callback) => {
             const response = this.preHandle(event, context);
             try {
-                await this.chainMiddlewares(this.middlewares, response, (event, response, context) => {
+                const fullMiddlewares = preMiddlewares.concat(this.middlewares, postMiddlewares);
+                await this.chainMiddlewares(fullMiddlewares, response, (event, response, context) => {
                     const obj = new classHandler(event, response);
                     return obj[name].apply(obj, [event, response, obj]);
                 })(event, context);
@@ -68,11 +69,11 @@ class Router {
         }
         callback(null, response.getResponse());
     }
-    add(exports, name, handler) {
-        exports[name] = this.handler(handler);
+    add(exports, name, handler, preMiddlewares, postMiddlewares) {
+        exports[name] = this.handler(handler, preMiddlewares, postMiddlewares);
     }
-    addClass(exports, name, handler) {
-        exports[name] = this.classHandler(handler, name);
+    addClass(exports, name, handler, preMiddlewares, postMiddlewares) {
+        exports[name] = this.classHandler(handler, name, preMiddlewares, postMiddlewares);
     }
 }
 exports.Router = Router;
@@ -180,7 +181,7 @@ class AbstractMiddleware {
             return result;
         }
         catch (err) {
-            this.error(event, context, response, err);
+            await this.error(event, context, response, err);
             throw err;
         }
     }

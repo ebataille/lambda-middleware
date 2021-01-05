@@ -43,7 +43,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], TestErrorController.prototype, "error", null);
 TestErrorController = __decorate([
-    Annotations_1.ClassController({ json: true, exports, router: new Router_1.Router([new AsyncMiddlewares_1.AsyncMiddlewares(1, 500), new AsyncMiddlewares_1.AsyncMiddlewares(2, 200), new AsyncMiddlewares_1.AsyncMiddlewares(3, 150)]) }),
+    Annotations_1.ClassController({ json: true, exports, router: new Router_1.Router([new AsyncMiddlewares_1.AsyncMiddlewares(1, 5000), new AsyncMiddlewares_1.AsyncMiddlewares(2, 200), new AsyncMiddlewares_1.AsyncMiddlewares(3, 150)]) }),
     __metadata("design:paramtypes", [Object, Router_1.Response])
 ], TestErrorController);
 //# sourceMappingURL=TestErrorController.js.map

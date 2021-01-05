@@ -3,7 +3,7 @@ import {body, ClassController, Method} from "../Annotations";
 import {AsyncMiddlewares} from "./AsyncMiddlewares";
 
 
-@ClassController({json: true, exports, router: new Router([new AsyncMiddlewares(1, 500), new AsyncMiddlewares(2, 200), new AsyncMiddlewares(3, 150)])})
+@ClassController({json: true, exports, router: new Router([new AsyncMiddlewares(1, 5000), new AsyncMiddlewares(2, 200), new AsyncMiddlewares(3, 150)])})
 class TestErrorController {
 
 	constructor(req: LambdaRequest<any>, response: Response) {

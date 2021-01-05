@@ -5,11 +5,12 @@ export declare class Router {
     private chainMiddlewares;
     private preHandle;
     private catchError;
-    handler: (finalHandler: (event: LambdaRequest<any>, response: Response, context: APIGatewayEventRequestContext) => Promise<any>) => (event: LambdaRequest<any>, context: APIGatewayEventRequestContext, callback: Function) => Promise<void>;
-    classHandler: (classHandler: any, name: string) => (event: LambdaRequest<any>, context: APIGatewayEventRequestContext, callback: Function) => Promise<void>;
-    add(exports: any, name: string, handler: (event: LambdaRequest<any>, response: Response, context: APIGatewayEventRequestContext) => Promise<any>): void;
-    addClass(exports: any, name: string, handler: Function): void;
+    handler: (finalHandler: AWSCallback, preMiddlewares?: AbstractMiddleware<any>[], postMiddlewares?: AbstractMiddleware<any>[]) => (event: LambdaRequest<any>, context: import("aws-lambda").APIGatewayEventRequestContextWithAuthorizer<import("aws-lambda").APIGatewayEventDefaultAuthorizerContext>, callback: Function) => Promise<void>;
+    classHandler: (classHandler: any, name: string, preMiddlewares?: AbstractMiddleware<any>[], postMiddlewares?: AbstractMiddleware<any>[]) => (event: LambdaRequest<any>, context: import("aws-lambda").APIGatewayEventRequestContextWithAuthorizer<import("aws-lambda").APIGatewayEventDefaultAuthorizerContext>, callback: Function) => Promise<void>;
+    add(exports: any, name: string, handler: AWSCallback, preMiddlewares?: AbstractMiddleware<any>[], postMiddlewares?: AbstractMiddleware<any>[]): void;
+    addClass(exports: any, name: string, handler: any, preMiddlewares?: AbstractMiddleware<any>[], postMiddlewares?: AbstractMiddleware<any>[]): void;
 }
+declare type AWSCallback = (event: LambdaRequest<any>, response: Response, context: APIGatewayEventRequestContext) => Promise<any>;
 export declare class Response {
     private req;
     private _statusCode;
@@ -44,3 +45,4 @@ export interface LambdaRequest<T> extends APIGatewayProxyEvent {
     json: T;
     secret: string;
 }
+export {};

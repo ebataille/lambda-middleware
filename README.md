@@ -10,6 +10,9 @@ npm install --save @igloobuster/aws_lambda_middleware
 ```
 
 ## Changelog
+* v1.0.2
+  * Add Pre and Post middlewares for methods
+
 * v1.0.1
   * Bug Fix on Node12.19+, __proto__ made http_agent crash, change it by a Map and className
 
@@ -138,6 +141,16 @@ const router = new Router([new BodyParserMiddleware(), new CorsMiddleware()]);
 new HelloWorld(router);
 ```
 
+### Pre and Post middlewares
+
+Sometime you need a method to have its own middlewares running before or after the class middlewares.<br/>
+You can declare them like this :
+
+```typescript
+const router = new Router([new BodyParserMiddleware(), new CorsMiddleware()]);
+new HelloWorld(router, [new PreMiddleware1(), new PreMiddleware2()], [new PostMiddleware1(), new PostMiddleware2()]);
+```
+
 ## Annotations
 
 The library also provides annotation to make it more easy to use
@@ -190,6 +203,3 @@ Here are the annotations availables:
 `@request`: To have the full request object<br/>
 `@response`: To have the full response object
 
-## What's next
-
-I am thinking of a way to generate a serverless.yml file or other mechanism to automatically have a valid file for serverless based on the annotation

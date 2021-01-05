@@ -1,6 +1,5 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.BodyParserMiddleware = void 0;
 /*
 Copyright 2020 Edouard Bataille
 

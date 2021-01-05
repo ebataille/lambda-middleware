@@ -1,6 +1,5 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.GzipMiddleware = void 0;
 /*
 Copyright 2020 Edouard Bataille
 

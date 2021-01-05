@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
  */
-import {LambdaRequest, Response, Router} from "./middleware/Router";
+import {AbstractMiddleware, LambdaRequest, Response, Router} from "./middleware/Router";
 import {APIGatewayEventRequestContext} from "aws-lambda";
 import "reflect-metadata";
 
@@ -36,15 +36,28 @@ export interface Result {
 	headers?: any[];
 }
 
-const metadataClass: Map<any, any> = new Map()
+interface MetaData {
+	defaultJson?: boolean;
+	methods: Method[];
+	isServerClass: Boolean;
+}
+
+interface Method {
+	name: string;
+	value: Function;
+	preMiddlewares?: AbstractMiddleware<any>[];
+	postMiddlewares?: AbstractMiddleware<any>[];
+}
+
+const metadataClass: Map<any, MetaData> = new Map();
 
 export function ClassController<T extends any>(controllerParams: ControllerParams) {
 	return (target: any) => {
 		initClassTarget(target);
 		const metadata = getMetadata(target);
-		metadata.defaultJson = controllerParams.json
+		metadata.defaultJson = controllerParams.json;
 		for (let subRoute of metadata.methods) {
-			controllerParams.router.addClass(controllerParams.exports, subRoute.name, target);
+			controllerParams.router.addClass(controllerParams.exports, subRoute.name, target, subRoute.preMiddlewares, subRoute.postMiddlewares);
 		}
 	}
 }
@@ -54,7 +67,7 @@ export function Controller<T extends any>(controllerParams: ControllerParams) {
 		const res = new target();
 		initClassTarget(res);
 		const metadata = getMetadata(target);
-		metadata.defaultJson = controllerParams.json
+		metadata.defaultJson = controllerParams.json;
 		for (let subRoute of metadata.methods) {
 			controllerParams.router.add(controllerParams.exports, subRoute.name, async (req: LambdaRequest<any>, response: Response, context: APIGatewayEventRequestContext) => subRoute.value(req, response, res));
 		}
@@ -80,7 +93,7 @@ function getProperValue(value: string | null, targetType: string | Function) {
 	}
 }
 
-function handleMethod<T extends any>(routeValues: ControllerValues, target: T, key: string, descriptor: TypedPropertyDescriptor<(...args: any[]) => Promise<Result | any>> | undefined) {
+function handleMethod<T extends any>(routeValues: ControllerValues, preMiddlewares: AbstractMiddleware<any>[] | undefined, postMiddlewares: AbstractMiddleware<any>[] | undefined, target: T, key: string, descriptor: TypedPropertyDescriptor<(...args: any[]) => Promise<Result | any>> | undefined) {
 	if (descriptor === undefined) {
 		descriptor = Object.getOwnPropertyDescriptor(target, key);
 	}
@@ -155,20 +168,22 @@ function handleMethod<T extends any>(routeValues: ControllerValues, target: T, k
 	// @ts-ignore
 	getMetadata(target).methods.push({
 		name: key,
-		value: descriptor.value
+		value: descriptor.value,
+		preMiddlewares,
+		postMiddlewares
 	});
 	return descriptor;
 }
 
-export function Method<T extends any>(routeValues: ControllerValues = {}) {
+export function Method<T extends any>(routeValues: ControllerValues = {}, preMiddlewares?: AbstractMiddleware<any>[], postMiddlewares?: AbstractMiddleware<any>[]) {
 	return (target: T, key: string, descriptor: TypedPropertyDescriptor<(...args: any[]) => Promise<any>>) => {
-		return handleMethod.apply(this, [routeValues, target, key, descriptor]);
+		return handleMethod.apply(this, [routeValues, preMiddlewares, postMiddlewares, target, key, descriptor]);
 	}
 }
 
-function getMetadata (target : any) {
+function getMetadata(target: any): MetaData {
 	const name = target.name || target.constructor.name;
-	return metadataClass.get(name);
+	return metadataClass.get(name)!;
 }
 
 function initClassTarget(target: any) {
@@ -257,7 +272,7 @@ export function custom(paramName?: string) {
 function getType<T>(target: T, key: string, index: number) {
 	let type = null;
 	if (Reflect.hasMetadata("design:paramtypes", target, key)) {
-		const types = Reflect.getMetadata("design:paramtypes", target, key)
+		const types = Reflect.getMetadata("design:paramtypes", target, key);
 		if (types.length > index) {
 			// exception for Boolean because Boolean("false") === true
 			type = types[index] === Boolean ? "boolean" : types[index];

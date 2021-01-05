@@ -1,6 +1,5 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.custom = exports.query = exports.body = exports.param = exports.header = exports.response = exports.request = exports.Method = exports.Controller = exports.ClassController = void 0;
 require("reflect-metadata");
 const METADATA_METHOD_KEY = "ea_metadata_";
 const metadataClass = new Map();
@@ -10,7 +9,7 @@ function ClassController(controllerParams) {
         const metadata = getMetadata(target);
         metadata.defaultJson = controllerParams.json;
         for (let subRoute of metadata.methods) {
-            controllerParams.router.addClass(controllerParams.exports, subRoute.name, target);
+            controllerParams.router.addClass(controllerParams.exports, subRoute.name, target, subRoute.preMiddlewares, subRoute.postMiddlewares);
         }
     };
 }
@@ -45,7 +44,7 @@ function getProperValue(value, targetType) {
             return value;
     }
 }
-function handleMethod(routeValues, target, key, descriptor) {
+function handleMethod(routeValues, preMiddlewares, postMiddlewares, target, key, descriptor) {
     if (descriptor === undefined) {
         descriptor = Object.getOwnPropertyDescriptor(target, key);
     }
@@ -121,13 +120,15 @@ function handleMethod(routeValues, target, key, descriptor) {
     // @ts-ignore
     getMetadata(target).methods.push({
         name: key,
-        value: descriptor.value
+        value: descriptor.value,
+        preMiddlewares,
+        postMiddlewares
     });
     return descriptor;
 }
-function Method(routeValues = {}) {
+function Method(routeValues = {}, preMiddlewares, postMiddlewares) {
     return (target, key, descriptor) => {
-        return handleMethod.apply(this, [routeValues, target, key, descriptor]);
+        return handleMethod.apply(this, [routeValues, preMiddlewares, postMiddlewares, target, key, descriptor]);
     };
 }
 exports.Method = Method;

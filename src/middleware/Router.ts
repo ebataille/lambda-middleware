@@ -61,20 +61,22 @@ export class Router {
 		callback(null, response.getResponse());
 	}
 
-	public handler = (finalHandler: (event: LambdaRequest<any>, response: Response, context: APIGatewayEventRequestContext) => Promise<any>) => async (event: LambdaRequest<any>, context: APIGatewayEventRequestContext, callback: Function) => {
+	public handler = (finalHandler: AWSCallback, preMiddlewares: AbstractMiddleware<any>[] = [], postMiddlewares: AbstractMiddleware<any>[] = []) => async (event: LambdaRequest<any>, context: APIGatewayEventRequestContext, callback: Function) => {
 		const response = this.preHandle(event, context);
 		try {
-			await this.chainMiddlewares(this.middlewares, response, finalHandler)(event, context);
+			const fullMiddlewares = preMiddlewares.concat(this.middlewares, postMiddlewares);
+			await this.chainMiddlewares(fullMiddlewares, response, finalHandler)(event, context);
 			callback(null, response.getResponse());
 		} catch (err) {
 			this.catchError(err, response, callback);
 		}
 	};
 
-	public classHandler = (classHandler: any, name: string) => async (event: LambdaRequest<any>, context: APIGatewayEventRequestContext, callback: Function) => {
+	public classHandler = (classHandler: any, name: string, preMiddlewares: AbstractMiddleware<any>[] = [], postMiddlewares: AbstractMiddleware<any>[] = []) => async (event: LambdaRequest<any>, context: APIGatewayEventRequestContext, callback: Function) => {
 		const response = this.preHandle(event, context);
 		try {
-			await this.chainMiddlewares(this.middlewares, response, (event, response, context) => {
+			const fullMiddlewares = preMiddlewares.concat(this.middlewares, postMiddlewares);
+			await this.chainMiddlewares(fullMiddlewares, response, (event, response, context) => {
 				const obj = new classHandler(event, response);
 				return obj[name].apply(obj, [event, response, obj]);
 			})(event, context);
@@ -84,14 +86,16 @@ export class Router {
 		}
 	};
 
-	public add(exports: any, name: string, handler: (event: LambdaRequest<any>, response: Response, context: APIGatewayEventRequestContext) => Promise<any>) {
-		exports[name] = this.handler(handler);
+	public add(exports: any, name: string, handler: AWSCallback, preMiddlewares?: AbstractMiddleware<any>[], postMiddlewares?: AbstractMiddleware<any>[]) {
+		exports[name] = this.handler(handler, preMiddlewares, postMiddlewares);
 	}
 
-	public addClass(exports: any, name: string, handler: Function) {
-		exports[name] = this.classHandler(handler, name);
+	public addClass(exports: any, name: string, handler: any, preMiddlewares?: AbstractMiddleware<any>[], postMiddlewares?: AbstractMiddleware<any>[]) {
+		exports[name] = this.classHandler(handler, name, preMiddlewares, postMiddlewares);
 	}
 }
+
+type AWSCallback = (event: LambdaRequest<any>, response: Response, context: APIGatewayEventRequestContext) => Promise<any>;
 
 export class Response {
 	private _statusCode: number = 0;
@@ -216,7 +220,7 @@ export abstract class AbstractMiddleware<T> {
 			await this.after(request, context, response);
 			return result;
 		} catch (err) {
-			this.error(event, context, response, err);
+			await this.error(event, context, response, err);
 			throw err;
 		}
 	}

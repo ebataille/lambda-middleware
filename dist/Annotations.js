@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.custom = exports.query = exports.body = exports.param = exports.header = exports.response = exports.request = exports.Method = exports.Controller = exports.ClassController = void 0;
 require("reflect-metadata");
 const METADATA_METHOD_KEY = "ea_metadata_";
 const metadataClass = new Map();
@@ -237,12 +238,14 @@ function addProperty(target, key, index, type, reqName, targetType = "string") {
 }
 // https://stackoverflow.com/questions/1007981/how-to-get-function-parameter-names-values-dynamically/9924463#9924463
 function getParamNames(func) {
-    let STRIP_COMMENTS = /(\/\/.*$)|(\/\*[\s\S]*?\*\/)|(\s*=[^,\)]*(('(?:\\'|[^'\r\n])*')|("(?:\\"|[^"\r\n])*"))|(\s*=[^,\)]*))/mg;
-    let ARGUMENT_NAMES = /([^\s,]+)/g;
+    let STRIP_COMMENTS = /(\/\*([\s\S]*?)\*\/\n?)|(\/\/)(.*\n)?/mg;
+    let ARGUMENT_NAMES = /(\w+)?(\s?=\s?.*)?/g;
     let fnStr = func.toString().replace(STRIP_COMMENTS, '');
-    let result = fnStr.slice(fnStr.indexOf('(') + 1, fnStr.indexOf(')')).match(ARGUMENT_NAMES);
-    if (result === null)
+    let params = fnStr.slice(fnStr.indexOf('(') + 1, fnStr.indexOf(')'));
+    let result = params.split(",").map(item => item.trim().replace(ARGUMENT_NAMES, "$1"));
+    if (result === null) {
         result = [];
+    }
     return result;
 }
 //# sourceMappingURL=Annotations.js.map

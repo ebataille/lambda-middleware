@@ -5,8 +5,8 @@ export declare class Router {
     private chainMiddlewares;
     private preHandle;
     private catchError;
-    handler: (finalHandler: AWSCallback, preMiddlewares?: AbstractMiddleware<any>[], postMiddlewares?: AbstractMiddleware<any>[]) => (event: LambdaRequest<any>, context: import("aws-lambda").APIGatewayEventRequestContextWithAuthorizer<import("aws-lambda").APIGatewayEventDefaultAuthorizerContext>, callback: Function) => Promise<void>;
-    classHandler: (classHandler: any, name: string, preMiddlewares?: AbstractMiddleware<any>[], postMiddlewares?: AbstractMiddleware<any>[]) => (event: LambdaRequest<any>, context: import("aws-lambda").APIGatewayEventRequestContextWithAuthorizer<import("aws-lambda").APIGatewayEventDefaultAuthorizerContext>, callback: Function) => Promise<void>;
+    handler: (finalHandler: AWSCallback, preMiddlewares?: AbstractMiddleware<any>[], postMiddlewares?: AbstractMiddleware<any>[]) => (event: LambdaRequest<any>, context: APIGatewayEventRequestContext, callback: Function) => Promise<void>;
+    classHandler: (classHandler: any, name: string, preMiddlewares?: AbstractMiddleware<any>[], postMiddlewares?: AbstractMiddleware<any>[]) => (event: LambdaRequest<any>, context: APIGatewayEventRequestContext, callback: Function) => Promise<void>;
     add(exports: any, name: string, handler: AWSCallback, preMiddlewares?: AbstractMiddleware<any>[], postMiddlewares?: AbstractMiddleware<any>[]): void;
     addClass(exports: any, name: string, handler: any, preMiddlewares?: AbstractMiddleware<any>[], postMiddlewares?: AbstractMiddleware<any>[]): void;
 }

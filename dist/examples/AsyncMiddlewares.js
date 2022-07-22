@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.AsyncMiddlewares = void 0;
 const Router_1 = require("../middleware/Router");
 class AsyncMiddlewares extends Router_1.AbstractMiddleware {
     constructor(count, timeout) {

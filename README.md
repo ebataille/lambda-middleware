@@ -10,6 +10,9 @@ npm install --save @igloobuster/aws_lambda_middleware
 ```
 
 ## Changelog
+* v1.0.4
+  * Fix parsing argumentNames with default values
+  
 * v1.0.2
   * Add Pre and Post middlewares for methods
 

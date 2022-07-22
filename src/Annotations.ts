@@ -291,11 +291,13 @@ function addProperty(target: any, key: string, index: number, type: string, reqN
 
 // https://stackoverflow.com/questions/1007981/how-to-get-function-parameter-names-values-dynamically/9924463#9924463
 function getParamNames(func: Function) {
-	let STRIP_COMMENTS = /(\/\/.*$)|(\/\*[\s\S]*?\*\/)|(\s*=[^,\)]*(('(?:\\'|[^'\r\n])*')|("(?:\\"|[^"\r\n])*"))|(\s*=[^,\)]*))/mg;
-	let ARGUMENT_NAMES = /([^\s,]+)/g;
+	let STRIP_COMMENTS = /(\/\*([\s\S]*?)\*\/\n?)|(\/\/)(.*\n)?/mg;
+	let ARGUMENT_NAMES = /(\w+)?(\s?=\s?.*)?/g;
 	let fnStr = func.toString().replace(STRIP_COMMENTS, '');
-	let result = fnStr.slice(fnStr.indexOf('(') + 1, fnStr.indexOf(')')).match(ARGUMENT_NAMES);
-	if (result === null)
+	let params = fnStr.slice(fnStr.indexOf('(') + 1, fnStr.indexOf(')'));
+	let result = params.split(",").map(item => item.trim().replace(ARGUMENT_NAMES, "$1"));
+	if (result === null) {
 		result = [];
+	}
 	return result;
 }

@@ -13,7 +13,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 };
 var TestController_1;
 Object.defineProperty(exports, "__esModule", { value: true });
-"use strict";
+exports.TestController = void 0;
 const Annotations_1 = require("../Annotations");
 const Router_1 = require("../middleware/Router");
 let TestController = TestController_1 = class TestController {

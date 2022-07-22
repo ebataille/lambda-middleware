@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.AbstractMiddleware = exports.Response = exports.Router = void 0;
 const cookie = require("cookie");
 const cookie_signature_1 = require("cookie-signature");
 class Router {

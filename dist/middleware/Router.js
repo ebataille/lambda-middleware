@@ -106,6 +106,7 @@ class Response {
         return this._body;
     }
     json(body) {
+        this.setHeader("Content-Type", "application/json");
         this.setBody(JSON.stringify(body));
     }
     getBodyByStatus() {

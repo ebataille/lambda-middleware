@@ -132,6 +132,7 @@ export class Response {
 	}
 
 	public json(body: any) {
+		this.setHeader("Content-Type", "application/json");
 		this.setBody(JSON.stringify(body));
 	}
 

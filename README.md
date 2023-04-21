@@ -10,6 +10,8 @@ npm install --save @igloobuster/aws_lambda_middleware
 ```
 
 ## Changelog
+* v1.0.5
+  * response.json() set ContentType automatically
 * v1.0.4
   * Fix parsing argumentNames with default values
   

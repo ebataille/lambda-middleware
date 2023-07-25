@@ -59,7 +59,6 @@ class Router {
         return response;
     }
     catchError(err, response, callback) {
-        console.log(err);
         if (err.error && err.statusCode) {
             response.setStatusCode(err.statusCode);
             response.json(err.error);
@@ -188,9 +187,6 @@ class AbstractMiddleware {
         }
     }
     error(event, context, response, err) {
-        console.log(err);
-        response.setStatusCode(500);
-        response.setBody({ message: err.message });
     }
 }
 exports.AbstractMiddleware = AbstractMiddleware;

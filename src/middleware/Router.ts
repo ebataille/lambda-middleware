@@ -50,7 +50,6 @@ export class Router {
 	}
 
 	private catchError(err: any, response: Response, callback: Function) {
-		console.log(err);
 		if (err.error && err.statusCode) {
 			response.setStatusCode(err.statusCode);
 			response.json(err.error);
@@ -231,9 +230,6 @@ export abstract class AbstractMiddleware<T> {
 	protected async abstract after(event: LambdaRequest<T>, context: APIGatewayEventRequestContext, response: Response): Promise<void>;
 
 	protected error(event: APIGatewayProxyEvent, context: APIGatewayEventRequestContext, response: Response, err: Error) {
-		console.log(err);
-		response.setStatusCode(500);
-		response.setBody({message: err.message});
 	}
 }
 

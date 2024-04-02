@@ -1,7 +1,5 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-const Router_1 = require("../middleware/Router");
-const BodyParserMiddleware_1 = require("../middleware/BodyParserMiddleware");
+import { Router, AbstractMiddleware } from "../middleware/Router";
+import { BodyParserMiddleware } from "../middleware/BodyParserMiddleware";
 class ClassControllerExample {
     constructor(req, response) {
         // Here we can initialize our class with the request if needed
@@ -15,7 +13,7 @@ class ClassControllerExample {
         response.json({ ...req.json });
     }
 }
-class PreMiddleware extends Router_1.AbstractMiddleware {
+class PreMiddleware extends AbstractMiddleware {
     async after(event, context, response) {
         console.log("after called after other middlewares");
     }
@@ -23,7 +21,7 @@ class PreMiddleware extends Router_1.AbstractMiddleware {
         console.log("before called before other middlewares");
     }
 }
-class PostMiddleware extends Router_1.AbstractMiddleware {
+class PostMiddleware extends AbstractMiddleware {
     async after(event, context, response) {
         console.log("after called before other middlewares");
     }
@@ -31,7 +29,7 @@ class PostMiddleware extends Router_1.AbstractMiddleware {
         console.log("before called after other middlewares");
     }
 }
-const router = new Router_1.Router([new BodyParserMiddleware_1.BodyParserMiddleware()]);
+const router = new Router([new BodyParserMiddleware()]);
 router.addClass(exports, "echo", ClassControllerExample);
 router.addClass(exports, "preAndPostMiddleware", ClassControllerExample, [new PreMiddleware()], [new PostMiddleware()]);
 //# sourceMappingURL=ClassControllerExample.js.map

@@ -16,6 +16,8 @@ limitations under the License.
 import {AbstractMiddleware, LambdaRequest, Response, Router} from "./middleware/Router";
 import {APIGatewayEventRequestContext} from "aws-lambda";
 import "reflect-metadata";
+import {TestController} from "./examples/TestController.js";
+import Controller from "./middleware/Controller.js";
 
 const METADATA_METHOD_KEY: string = "ea_metadata_";
 
@@ -57,19 +59,7 @@ export function ClassController<T extends any>(controllerParams: ControllerParam
 		const metadata = getMetadata(target);
 		metadata.defaultJson = controllerParams.json;
 		for (let subRoute of metadata.methods) {
-			controllerParams.router.addClass(controllerParams.exports, subRoute.name, target, subRoute.preMiddlewares, subRoute.postMiddlewares);
-		}
-	}
-}
-
-export function Controller<T extends any>(controllerParams: ControllerParams) {
-	return (target: any) => {
-		const res = new target();
-		initClassTarget(res);
-		const metadata = getMetadata(target);
-		metadata.defaultJson = controllerParams.json;
-		for (let subRoute of metadata.methods) {
-			controllerParams.router.add(controllerParams.exports, subRoute.name, async (req: LambdaRequest<any>, response: Response, context: APIGatewayEventRequestContext) => subRoute.value(req, response, res));
+			Controller.setupClass(controllerParams.router, subRoute.name, target, subRoute.preMiddlewares, subRoute.postMiddlewares);
 		}
 	}
 }

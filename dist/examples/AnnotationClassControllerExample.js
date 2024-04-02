@@ -1,4 +1,3 @@
-"use strict";
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -11,11 +10,10 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-Object.defineProperty(exports, "__esModule", { value: true });
-const Router_1 = require("../middleware/Router");
-const BodyParserMiddleware_1 = require("../middleware/BodyParserMiddleware");
-const Annotations_1 = require("../Annotations");
-class PreMiddleware extends Router_1.AbstractMiddleware {
+import { AbstractMiddleware, Response, Router } from "../middleware/Router";
+import { BodyParserMiddleware } from "../middleware/BodyParserMiddleware";
+import { body, ClassController, Method } from "../Annotations";
+class PreMiddleware extends AbstractMiddleware {
     async after(event, context, response) {
         console.log("annotation after called after other middlewares");
     }
@@ -23,7 +21,7 @@ class PreMiddleware extends Router_1.AbstractMiddleware {
         console.log("annotation before called before other middlewares");
     }
 }
-class PostMiddleware extends Router_1.AbstractMiddleware {
+class PostMiddleware extends AbstractMiddleware {
     async after(event, context, response) {
         console.log("annotation after called before other middlewares");
     }
@@ -65,20 +63,20 @@ let AnnotationClassControllerExample = class AnnotationClassControllerExample {
     }
 };
 __decorate([
-    Annotations_1.Method(),
+    Method(),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], AnnotationClassControllerExample.prototype, "echo", null);
 __decorate([
-    Annotations_1.Method({}, [new PreMiddleware()], [new PostMiddleware()]),
-    __param(0, Annotations_1.body),
+    Method({}, [new PreMiddleware()], [new PostMiddleware()]),
+    __param(0, body),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AnnotationClassControllerExample.prototype, "preAndPostMiddleware", null);
 AnnotationClassControllerExample = __decorate([
-    Annotations_1.ClassController({ router: new Router_1.Router([new BodyParserMiddleware_1.BodyParserMiddleware()]), exports, json: true }),
-    __metadata("design:paramtypes", [Object, Router_1.Response])
+    ClassController({ router: new Router([new BodyParserMiddleware()]), exports, json: true }),
+    __metadata("design:paramtypes", [Object, Response])
 ], AnnotationClassControllerExample);
 //# sourceMappingURL=AnnotationClassControllerExample.js.map

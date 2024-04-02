@@ -1,6 +1,3 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.LambdaError = void 0;
 /*
 Copyright 2020 Edouard Bataille
 
@@ -16,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
  */
-class LambdaError extends Error {
+export class LambdaError extends Error {
     constructor(message, statusCode = 500) {
         super(message);
         this.statusCode = statusCode;
@@ -25,5 +22,4 @@ class LambdaError extends Error {
         return { message: this.message };
     }
 }
-exports.LambdaError = LambdaError;
 //# sourceMappingURL=LambdaError.js.map

@@ -1,23 +1,20 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.AbstractMiddleware = exports.Response = exports.Router = void 0;
-const cookie = require("cookie");
-const cookie_signature_1 = require("cookie-signature");
-class Router {
+import * as cookie from "cookie";
+import { sign } from "cookie-signature";
+export class Router {
     constructor(middlewares = []) {
         this.middlewares = middlewares;
-        this.handler = (finalHandler, preMiddlewares = [], postMiddlewares = []) => async (event, context, callback) => {
+        this.handler = (finalHandler, preMiddlewares = [], postMiddlewares = []) => async (event, context) => {
             const response = this.preHandle(event, context);
             try {
                 const fullMiddlewares = preMiddlewares.concat(this.middlewares, postMiddlewares);
                 await this.chainMiddlewares(fullMiddlewares, response, finalHandler)(event, context);
-                callback(null, response.getResponse());
+                return response.getResponse();
             }
             catch (err) {
-                this.catchError(err, response, callback);
+                this.catchError(err, response);
             }
         };
-        this.classHandler = (classHandler, name, preMiddlewares = [], postMiddlewares = []) => async (event, context, callback) => {
+        this.classHandler = (classHandler, name, preMiddlewares = [], postMiddlewares = []) => async (event, context) => {
             const response = this.preHandle(event, context);
             try {
                 const fullMiddlewares = preMiddlewares.concat(this.middlewares, postMiddlewares);
@@ -25,10 +22,10 @@ class Router {
                     const obj = new classHandler(event, response);
                     return obj[name].apply(obj, [event, response, obj]);
                 })(event, context);
-                callback(null, response.getResponse());
+                return response.getResponse();
             }
             catch (err) {
-                this.catchError(err, response, callback);
+                this.catchError(err, response);
             }
         };
     }
@@ -58,7 +55,7 @@ class Router {
         event.headers = event.headers || {};
         return response;
     }
-    catchError(err, response, callback) {
+    catchError(err, response) {
         if (err.error && err.statusCode) {
             response.setStatusCode(err.statusCode);
             response.json(err.error);
@@ -67,17 +64,23 @@ class Router {
             response.setStatusCode(500);
             response.json(err.body ? err.body : (err.message ? err.message : err));
         }
-        callback(null, response.getResponse());
+        return response.getResponse();
     }
     add(exports, name, handler, preMiddlewares, postMiddlewares) {
         exports[name] = this.handler(handler, preMiddlewares, postMiddlewares);
     }
-    addClass(exports, name, handler, preMiddlewares, postMiddlewares) {
-        exports[name] = this.classHandler(handler, name, preMiddlewares, postMiddlewares);
+    addClass(name, handler, preMiddlewares, postMiddlewares) {
+        return this.classHandler(handler, name, preMiddlewares, postMiddlewares);
+    }
+    static handle(req, context) {
+        const handler = Router.routes[req.path];
+        if (handler) {
+            return handler(req, context);
+        }
     }
 }
-exports.Router = Router;
-class Response {
+Router.routes = {};
+export class Response {
     constructor(req) {
         this.req = req;
         this._statusCode = 0;
@@ -158,7 +161,7 @@ class Response {
         }
         let val = typeof value === 'object' ? 'j:' + JSON.stringify(value) : String(value);
         if (signed) {
-            val = 's:' + cookie_signature_1.sign(val, secret);
+            val = 's:' + sign(val, secret);
         }
         if ('maxAge' in options) {
             opts.expires = new Date(Date.now() + opts.maxAge);
@@ -171,8 +174,7 @@ class Response {
         return this;
     }
 }
-exports.Response = Response;
-class AbstractMiddleware {
+export class AbstractMiddleware {
     async execute(event, context, response, next) {
         try {
             const request = event;
@@ -189,5 +191,4 @@ class AbstractMiddleware {
     error(event, context, response, err) {
     }
 }
-exports.AbstractMiddleware = AbstractMiddleware;
 //# sourceMappingURL=Router.js.map

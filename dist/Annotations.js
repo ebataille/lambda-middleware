@@ -1,32 +1,17 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.custom = exports.query = exports.body = exports.param = exports.header = exports.response = exports.request = exports.Method = exports.Controller = exports.ClassController = void 0;
-require("reflect-metadata");
+import "reflect-metadata";
+import Controller from "./middleware/Controller.js";
 const METADATA_METHOD_KEY = "ea_metadata_";
 const metadataClass = new Map();
-function ClassController(controllerParams) {
+export function ClassController(controllerParams) {
     return (target) => {
         initClassTarget(target);
         const metadata = getMetadata(target);
         metadata.defaultJson = controllerParams.json;
         for (let subRoute of metadata.methods) {
-            controllerParams.router.addClass(controllerParams.exports, subRoute.name, target, subRoute.preMiddlewares, subRoute.postMiddlewares);
+            Controller.setupClass(controllerParams.router, subRoute.name, target, subRoute.preMiddlewares, subRoute.postMiddlewares);
         }
     };
 }
-exports.ClassController = ClassController;
-function Controller(controllerParams) {
-    return (target) => {
-        const res = new target();
-        initClassTarget(res);
-        const metadata = getMetadata(target);
-        metadata.defaultJson = controllerParams.json;
-        for (let subRoute of metadata.methods) {
-            controllerParams.router.add(controllerParams.exports, subRoute.name, async (req, response, context) => subRoute.value(req, response, res));
-        }
-    };
-}
-exports.Controller = Controller;
 function getProperValue(value, targetType) {
     if (!value) {
         return value;
@@ -127,12 +112,11 @@ function handleMethod(routeValues, preMiddlewares, postMiddlewares, target, key,
     });
     return descriptor;
 }
-function Method(routeValues = {}, preMiddlewares, postMiddlewares) {
+export function Method(routeValues = {}, preMiddlewares, postMiddlewares) {
     return (target, key, descriptor) => {
         return handleMethod.apply(this, [routeValues, preMiddlewares, postMiddlewares, target, key, descriptor]);
     };
 }
-exports.Method = Method;
 function getMetadata(target) {
     const name = target.name || target.constructor.name;
     return metadataClass.get(name);
@@ -146,32 +130,29 @@ function initClassTarget(target) {
 /**
  * get the @type LambdaRequest object
  */
-function request(target, key, index) {
+export function request(target, key, index) {
     addProperty(target, key, index, "request");
 }
-exports.request = request;
 /**
  * Get the @type Response object
  */
-function response(target, key, index) {
+export function response(target, key, index) {
     addProperty(target, key, index, "response");
 }
-exports.response = response;
 /**
  * Get an header property or if no paramName provided the full header object
  * @param paramName the name of the property to get (optional)
  */
-function header(paramName) {
+export function header(paramName) {
     return (target, key, index) => {
         addProperty(target, key, index, "header", paramName);
     };
 }
-exports.header = header;
 /**
  * Get a path parameter property, the parameter will be cast using the Reflect typescript library
  * @param paramName the name of the property to get (optional)
  */
-function param(paramName) {
+export function param(paramName) {
     return (target, key, index) => {
         const type = getType(target, key, index);
         let _paramName = paramName;
@@ -181,19 +162,17 @@ function param(paramName) {
         addProperty(target, key, index, "params", _paramName, type);
     };
 }
-exports.param = param;
 /**
  * get the body of the request, if the body is a json, return the json, the plain text else
  */
-function body(target, key, index) {
+export function body(target, key, index) {
     addProperty(target, key, index, "body");
 }
-exports.body = body;
 /**
  * Get a query property, the property will be cast using the Reflect typescript library
  * @param paramName the name of the property to get (optional)
  */
-function query(paramName) {
+export function query(paramName) {
     return (target, key, index) => {
         let type = getType(target, key, index);
         let _paramName = paramName;
@@ -203,12 +182,11 @@ function query(paramName) {
         addProperty(target, key, index, "query", _paramName, type);
     };
 }
-exports.query = query;
 /**
  * Get a property inside the request handled by the middleware
  * @param paramName The name of the property to get
  */
-function custom(paramName) {
+export function custom(paramName) {
     return (target, key, index) => {
         let _paramName = paramName;
         if (!_paramName) {
@@ -217,7 +195,6 @@ function custom(paramName) {
         addProperty(target, key, index, "custom", _paramName);
     };
 }
-exports.custom = custom;
 function getType(target, key, index) {
     let type = null;
     if (Reflect.hasMetadata("design:paramtypes", target, key)) {

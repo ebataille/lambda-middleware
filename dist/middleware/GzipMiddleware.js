@@ -1,6 +1,3 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.GzipMiddleware = void 0;
 /*
 Copyright 2020 Edouard Bataille
 
@@ -16,9 +13,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
  */
-const Router_1 = require("./Router");
-const zlib = require("zlib");
-class GzipMiddleware extends Router_1.AbstractMiddleware {
+import { AbstractMiddleware } from "./Router";
+import * as zlib from "zlib";
+export class GzipMiddleware extends AbstractMiddleware {
     async after(event, context, response) {
         let acceptEncoding = event.headers['accept-encoding'];
         if (!acceptEncoding) {
@@ -63,5 +60,4 @@ class GzipMiddleware extends Router_1.AbstractMiddleware {
         response.setHeader("Vary", "Accept-Encoding");
     }
 }
-exports.GzipMiddleware = GzipMiddleware;
 //# sourceMappingURL=GzipMiddleware.js.map

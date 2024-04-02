@@ -1,8 +1,5 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.AsyncMiddlewares = void 0;
-const Router_1 = require("../middleware/Router");
-class AsyncMiddlewares extends Router_1.AbstractMiddleware {
+import { AbstractMiddleware } from "../middleware/Router";
+export class AsyncMiddlewares extends AbstractMiddleware {
     constructor(count, timeout) {
         super();
         this.count = count;
@@ -28,5 +25,4 @@ class AsyncMiddlewares extends Router_1.AbstractMiddleware {
         });
     }
 }
-exports.AsyncMiddlewares = AsyncMiddlewares;
 //# sourceMappingURL=AsyncMiddlewares.js.map

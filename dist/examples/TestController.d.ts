@@ -1,4 +1,4 @@
-import { Response } from "../middleware/Router";
+import { Response } from "../middleware/Router.js";
 export declare class TestController {
     foo: string;
     private static readonly STATIC_PROPERTY;
@@ -10,7 +10,7 @@ export declare class TestController {
         name: string;
         age: number;
     }>;
-    noResponse(response: Response): Promise<void>;
+    noResponse(res: Response): Promise<void>;
     doSomething(): {
         hello: string;
         staticProp: string;

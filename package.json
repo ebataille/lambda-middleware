@@ -9,6 +9,7 @@
 		"Typescript",
 		"Annotations"
 	],
+	"type": "module",
 	"repository": "git@github.com:ebataille/lambda-middleware.git",
 	"author": "edouard bataille",
 	"license": "Apache",

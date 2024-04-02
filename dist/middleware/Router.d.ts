@@ -1,14 +1,31 @@
 import { APIGatewayEventRequestContext, APIGatewayProxyEvent } from "aws-lambda";
 export declare class Router {
     private middlewares;
+    static routes: any;
     constructor(middlewares?: AbstractMiddleware<any>[]);
     private chainMiddlewares;
     private preHandle;
     private catchError;
-    handler: (finalHandler: AWSCallback, preMiddlewares?: AbstractMiddleware<any>[], postMiddlewares?: AbstractMiddleware<any>[]) => (event: LambdaRequest<any>, context: APIGatewayEventRequestContext, callback: Function) => Promise<void>;
-    classHandler: (classHandler: any, name: string, preMiddlewares?: AbstractMiddleware<any>[], postMiddlewares?: AbstractMiddleware<any>[]) => (event: LambdaRequest<any>, context: APIGatewayEventRequestContext, callback: Function) => Promise<void>;
+    handler: (finalHandler: AWSCallback, preMiddlewares?: AbstractMiddleware<any>[], postMiddlewares?: AbstractMiddleware<any>[]) => (event: LambdaRequest<any>, context: APIGatewayEventRequestContext) => Promise<{
+        statusCode: number;
+        body: any;
+        isBase64Encoded: boolean;
+        headers: any;
+    } | undefined>;
+    classHandler: (classHandler: any, name: string, preMiddlewares?: AbstractMiddleware<any>[], postMiddlewares?: AbstractMiddleware<any>[]) => (event: LambdaRequest<any>, context: APIGatewayEventRequestContext) => Promise<{
+        statusCode: number;
+        body: any;
+        isBase64Encoded: boolean;
+        headers: any;
+    } | undefined>;
     add(exports: any, name: string, handler: AWSCallback, preMiddlewares?: AbstractMiddleware<any>[], postMiddlewares?: AbstractMiddleware<any>[]): void;
-    addClass(exports: any, name: string, handler: any, preMiddlewares?: AbstractMiddleware<any>[], postMiddlewares?: AbstractMiddleware<any>[]): void;
+    addClass(name: string, handler: any, preMiddlewares?: AbstractMiddleware<any>[], postMiddlewares?: AbstractMiddleware<any>[]): (event: LambdaRequest<any>, context: APIGatewayEventRequestContext) => Promise<{
+        statusCode: number;
+        body: any;
+        isBase64Encoded: boolean;
+        headers: any;
+    } | undefined>;
+    static handle(req: APIGatewayProxyEvent, context: APIGatewayEventRequestContext): any;
 }
 declare type AWSCallback = (event: LambdaRequest<any>, response: Response, context: APIGatewayEventRequestContext) => Promise<any>;
 export declare class Response {

@@ -30,7 +30,7 @@ npm install --save @igloobuster/aws_lambda_middleware
 
 * v0.1.7
   * Adding addClass to the router to have one class instance per request
-  * Adding the annotation ClassController wich add a class to the router
+  * Adding the annotation Controller wich add a class to the router
 
 ## how It works
 
@@ -175,13 +175,13 @@ export class HelloController {
 }
 ```
 
-If you need to have on class instance per request use ```ClassController instead of controller```
+If you need to have on class instance per request use ```Controller instead of controller```
 ```typescript
 import {BodyParserMiddleware} from "@igloobuster/aws_lambda_middleware/dist/middleware/BodyParserMiddleware";
-import {ClassController, Method, param, query} from "@igloobuster/aws_lambda_middleware/dist/Annotations";
+import {Controller, Method, param, query} from "@igloobuster/aws_lambda_middleware/dist/Annotations";
 import {Router, LambdaRequest, Response} from "@igloobuster/aws_lambda_middleware/dist/middleware/Router"; import {LambdaRequest} from "./Router";
 
-@ClassController({exports, json: true, router: new Router([new BodyParserMiddleware()])})
+@Controller({exports, json: true, router: new Router([new BodyParserMiddleware()])})
 export class HelloController {
 
     constructor (request : LambdaRequest<any>, response : Response) {
